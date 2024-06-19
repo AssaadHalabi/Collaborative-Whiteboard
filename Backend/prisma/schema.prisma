@@ -4,14 +4,6 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
 // prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
@@ -24,9 +16,8 @@ datasource db {
 
 model User {
   id        String    @id @default(uuid())
-  name      String
+  name      String    @unique
   email     String    @unique
-  password  String
   boards    Board[]   @relation("UserBoards")
   drawings  Drawing[] @relation("UserDrawings")
   images    Image[]   @relation("UserImages")
@@ -35,37 +26,37 @@ model User {
 }
 
 model Board {
-  id        String     @id @default(uuid())
+  id        Int       @id @default(autoincrement())
   title     String
-  users     User[]     @relation("UserBoards", references: [id])
+  users     User[]    @relation("UserBoards")
   drawings  Drawing[]
   images    Image[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Drawing {
-  id        String     @id @default(uuid())
+  id        Int         @id @default(autoincrement())
   userId    String
-  boardId   String
-  user      User       @relation(fields: [userId], references: [id])
-  board     Board      @relation(fields: [boardId], references: [id])
+  boardId   Int
+  user      User        @relation("UserDrawings", fields: [userId], references: [id])
+  board     Board       @relation(fields: [boardId], references: [id])
   type      DrawingType
-  data      Json       // Store drawing data (lines, text, shapes) as JSON
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  data      Json // Store drawing data (lines, text, shapes) as JSON
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model Image {
-  id        String     @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
-  boardId   String
-  user      User       @relation(fields: [userId], references: [id])
-  board     Board      @relation(fields: [boardId], references: [id])
-  url       String     // Store the URL of the image
-  position  Json       // Store position data as JSON (e.g., { x: 0, y: 0 })
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  boardId   Int
+  user      User     @relation("UserImages", fields: [userId], references: [id])
+  board     Board    @relation(fields: [boardId], references: [id])
+  url       String // Store the URL of the image
+  position  Json // Store position data as JSON (e.g., { x: 0, y: 0 })
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum DrawingType {
