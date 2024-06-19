@@ -1,12 +1,12 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors');  // Import the cors middleware
+import express from 'express';
+import { createServer } from 'http';
+import socketIo from 'socket.io';
+import cors from 'cors';  // Import the cors middleware
 
 const app = express();
 app.use(cors());  // Enable CORS for all routes
 
-const server = http.createServer(app);
+const server = createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: "http://localhost:3000",  // Allow only the frontend origin
