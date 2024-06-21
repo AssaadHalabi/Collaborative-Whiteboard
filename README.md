@@ -1,10 +1,10 @@
-# Collaborative-Whiteboard
-This project is a collaborative drawing application inspired by TLDraw, built using React, Node.js, Express, Socket.IO, and MongoDB. It allows multiple users to draw on a shared canvas in real-time.
+# Collaboard
+This project is a collaborative drawing application inspired by TLDraw, built using React, Node.js, Express, Socket.IO, and Postgresql. It allows multiple users to draw on a shared canvas in real-time.
 
 ## Features
 
 - Real-time collaborative drawing
-- Persistent storage of drawings in MongoDB
+- Persistent storage of drawings in Postgresql
 - User authentication (to be implemented)
 - Support for multiple drawing tools (to be implemented)
 - Undo/redo functionality (to be implemented)
@@ -12,8 +12,10 @@ This project is a collaborative drawing application inspired by TLDraw, built us
 ## Prerequisites
 
 - Node.js
+- Socket.io
 - React
-- MongoDB
+- Prisma
+- Postgresql
 
 ## Installation
 
@@ -42,14 +44,25 @@ This project is a collaborative drawing application inspired by TLDraw, built us
 ## Running the Application
 ### Start the Server
 
-1. Ensure MongoDB is running on your local machine or provide a connection string for a remote MongoDB instance.
+1. Ensure Postgresql is running on your local machine or provide a connection string for a remote Postgresql instance.
 
-### Start the server:
-
+### Database generation:
+1. Intialize prisma
    ```bash
     cd Backend
+    npx prisma init
+   ```
+2. Add your Postgresql DATABASE_URL to the created .env file
+
+3. Generate the database schema and prisma client
+   ```bash
+    npm run dbgen
+   ```
+4. Start the server
+   ```bash
     node server.js
    ```
+
 ### Start the Client
 ### Start the React development server:
 
