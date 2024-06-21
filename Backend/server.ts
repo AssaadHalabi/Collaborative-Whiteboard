@@ -140,6 +140,8 @@ app.post('/drawings', async (req: Request, res: Response) => {
 app.put('/drawings/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { userId, boardId, type, data } = req.body;
+  const board: Board | null = await prisma.board.findUnique({ where: { id: Number(boardId) } });
+  if(!board) res.status(404).json(`Board ${boardId} doesn't exist`);
   const drawing: Drawing = await prisma.drawing.update({
     where: { id: Number(id) },
     data: { userId, boardId, type, data }
