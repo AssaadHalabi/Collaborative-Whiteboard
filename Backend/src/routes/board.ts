@@ -71,6 +71,7 @@ router.get('/boards', async (req: Request, res: Response) => {
 router.get('/boards/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const board: Board | null = await prisma.board.findUnique({ where: { id: Number(id) } });
+  if(!board) res.status(404).json(`Board with id ${id} doesn't exist`);
   res.json(board);
 });
 
