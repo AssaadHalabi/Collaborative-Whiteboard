@@ -443,14 +443,18 @@ export const handleResize = ({ canvas }: { canvas: fabric.Canvas | null }) => {
   const newWidth = Math.max(canvasElement.clientWidth, minWidth);
   const newHeight = Math.max(canvasElement.clientHeight, minHeight);
 
+try {
   canvas.setDimensions({
     width: newWidth,
     height: newHeight,
   });
-
   // Adjust the viewport of the canvas to the new dimensions
   canvas.calcOffset();
   canvas.renderAll();
+} catch (error:any) {
+  console.log(canvas);
+  return
+}
 };
 
 // zoom canvas on mouse scroll

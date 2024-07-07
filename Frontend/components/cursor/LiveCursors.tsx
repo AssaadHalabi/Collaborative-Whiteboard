@@ -8,8 +8,6 @@ const LiveCursors = ({ others }: LiveCursorProps) => {
     if (presence == null || !presence?.cursor) {
       return null;
     }
-    console.log(`Other connectionId: ${connectionId}`);
-    console.log(`presence info: ${JSON.stringify(presence, null, 2)}`);
     
     return (
       <Cursor
