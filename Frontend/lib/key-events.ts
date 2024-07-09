@@ -94,12 +94,12 @@ export const handleKeyDown = ({
   deleteShapeFromStorage: (id: string) => void;
 }) => {
   // Check if the key pressed is ctrl/cmd + c (copy)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 67) {
+  if ((e?.ctrlKey || e?.metaKey) && e.key === "c") {
     handleCopy(canvas);
   }
 
   // Check if the key pressed is ctrl/cmd + v (paste)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 86) {
+  if ((e?.ctrlKey || e?.metaKey) && e.key === "v") {
     handlePaste(canvas, syncShapeInStorage);
   }
 
@@ -109,18 +109,18 @@ export const handleKeyDown = ({
   // }
 
   // check if the key pressed is ctrl/cmd + x (cut)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 88) {
+  if ((e?.ctrlKey || e?.metaKey) && e.key === "x") {
     handleCopy(canvas);
     handleDelete(canvas, deleteShapeFromStorage);
   }
 
   // check if the key pressed is ctrl/cmd + z (undo)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 90) {
+  if ((e?.ctrlKey || e?.metaKey) && e.key === "z") {
     undo();
   }
 
   // check if the key pressed is ctrl/cmd + y (redo)
-  if ((e?.ctrlKey || e?.metaKey) && e.keyCode === 89) {
+  if ((e?.ctrlKey || e?.metaKey) && e.key === "y") {
     redo();
   }
 
