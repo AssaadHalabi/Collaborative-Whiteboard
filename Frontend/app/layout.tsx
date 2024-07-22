@@ -1,9 +1,9 @@
-import { Work_Sans } from "next/font/google";
-
-import "./globals.css";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
-import Room from "./Room";
+// This is the root layout component for your Next.js app.
+// Learn more: https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts#root-layout-required
+import { Inter } from 'next/font/google'
+import { cn } from '@/lib/utils'
+import './globals.css'
+import './lobby-globals.css'
 
 export const metadata = {
   title: "CollaBoard",
@@ -11,20 +11,30 @@ export const metadata = {
     "A minimalist Collaborative Whiteboard using fabric.js and Liveblocks for realtime collaboration",
 };
 
-const workSans = Work_Sans({
-  subsets: ["latin"],
-  variable: "--font-work-sans",
-  weight: ["400", "600", "700"],
-});
+const fontHeading = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-heading',
+})
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => (
-  <html lang='en'>
-    <body className={`${workSans.className} bg-primary-grey-200`}>
-      <Room>
-        <TooltipProvider>{children}</TooltipProvider>
-      </Room>
-    </body>
-  </html>
-);
+const fontBody = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+})
 
-export default RootLayout;
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body 
+        className={cn(
+          'antialiased',
+          fontHeading.variable,
+          fontBody.variable
+        )}
+      >
+        {children}
+      </body>
+    </html>
+  )
+}

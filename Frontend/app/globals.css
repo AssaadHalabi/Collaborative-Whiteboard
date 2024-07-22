@@ -3,7 +3,11 @@
 @tailwind utilities;
 
 @import "@liveblocks/react-comments/styles.css";
-
+@layer base {
+  :root {
+    --background: 215, 21%, 16%;
+  }
+}
 * {
   font-family:
     work sans,

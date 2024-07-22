@@ -1,12 +1,27 @@
-import Link from "next/link"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Button } from "@/components/ui/button"
-import { ChromeIcon } from "./ChromeIcon"
-import { ClapperboardIcon } from "./ClapperboardIcon"
+"use client";
+
+import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { ChromeIcon } from "./ChromeIcon";
+import { ClapperboardIcon } from "./ClapperboardIcon";
+import { useState } from 'react';
 
 export function Lobby() {
+  const router = useRouter();
+  const [name, setName] = useState('');
+  const [room, setRoom] = useState('');
+  const [action, setAction] = useState('create');
+
+  const handleSubmit = () => {
+    if (room) {
+      router.push(`/room/${room}`);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-dvh">
       <header className="bg-primary px-4 lg:px-6 h-14 flex items-center justify-between">
@@ -18,18 +33,18 @@ export function Lobby() {
       </header>
       <main className="flex-1 container mx-auto px-4 lg:px-6 py-12 flex justify-center">
         <div className="bg-card rounded-lg p-6 space-y-4 w-full max-w-md">
-          <h2 className="text-2xl font-bold">Join or Create Room</h2>
+          <h2 className="text-2xl font-bold capitalize">{action} Room</h2>
           <div className="grid gap-4">
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="Enter your name" />
+              <Input id="name" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
               <Label htmlFor="room">Room Name</Label>
-              <Input id="room" placeholder="Enter room name" />
+              <Input id="room" placeholder="Enter room name" value={room} onChange={(e) => setRoom(e.target.value)} />
             </div>
             <div className="flex items-center justify-between">
-              <RadioGroup defaultValue="join" className="flex items-center gap-2">
+              <RadioGroup defaultValue="create" className="flex items-center gap-2" onValueChange={setAction}>
                 <Label
                   htmlFor="join"
                   className="border cursor-pointer rounded-md p-2 flex items-center gap-2 [&:has(:checked)]:bg-muted"
@@ -45,7 +60,7 @@ export function Lobby() {
                   Create
                 </Label>
               </RadioGroup>
-              <Button>Join or Create</Button>
+              <Button className="bg-black text-white capitalize" onClick={handleSubmit}>{action} Room</Button>
             </div>
           </div>
         </div>
@@ -57,7 +72,7 @@ export function Lobby() {
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
-
+export default Lobby;

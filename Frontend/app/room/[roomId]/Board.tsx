@@ -24,7 +24,7 @@ import { handleImageUpload } from "@/lib/shapes";
 import { defaultNavElement } from "@/constants";
 import { ActiveElement, Attributes } from "@/types/type";
 
-const Home = () => {
+const Board = () => {
   
   /**
    * useUndo and useRedo are hooks provided by Liveblocks that allow you to
@@ -490,7 +490,7 @@ const Home = () => {
   }, [canvasObjects]);
 
   return (
-    <main className='h-screen overflow-hidden'>
+    <main className='h-screen overflow-hidden bg-primary-grey-200'>
       <Navbar
         imageInputRef={imageInputRef}
         activeElement={activeElement}
@@ -526,4 +526,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Board;
