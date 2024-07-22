@@ -71,6 +71,7 @@ router.get('/boards', async (req: Request, res: Response) => {
 router.get('/boards/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const board: Board | null = await prisma.board.findUnique({ where: { id: Number(id) } });
+  if(!board) res.status(404).json(`Board with id ${id} doesn't exist`);
   res.json(board);
 });
 
@@ -108,17 +109,13 @@ router.post('/boards', async (req: Request, res: Response) => {
   if (!userIds) {
     return res.status(400).json({ error: 'userIds is required' });
   }
-try {
-    const board: Board = await prisma.board.create({
-        data: {
-          title,
-          users: { connect: userIds.map((id: string) => ({ id })) }
-        }
-      });
-      res.status(201).json(board);
-} catch (error: any) {
-    res.status(400).json(error.message);
-}
+  const board: Board = await prisma.board.create({
+    data: {
+      title,
+      users: { connect: userIds.map((id: string) => ({ id })) }
+    }
+  });
+  res.status(201).json(board);
 });
 
 /**
@@ -145,9 +142,6 @@ try {
  *                 type: array
  *                 items:
  *                   type: string
- *             required:
- *               - title
- *               - userIds
  *     responses:
  *       200:
  *         description: The updated board
@@ -159,16 +153,24 @@ try {
 router.put('/boards/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { title, userIds } = req.body;
-  if (!userIds) {
-    return res.status(400).json({ error: 'userIds is required' });
+
+  const existingBoard: Board | null = await prisma.board.findUnique({ where: { id: Number(id) } });
+
+  if (!existingBoard) {
+    return res.status(404).json(`Board with id ${id} doesn't exist`);
   }
+
+  const updateData: any = { title };
+
+  if (userIds) {
+    updateData.users = { set: userIds.map((id: string) => ({ id })) };
+  }
+
   const board: Board = await prisma.board.update({
     where: { id: Number(id) },
-    data: {
-      title,
-      users: { set: userIds.map((id: string) => ({ id })) }
-    }
+    data: updateData
   });
+
   res.json(board);
 });
 
