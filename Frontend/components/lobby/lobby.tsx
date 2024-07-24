@@ -37,11 +37,11 @@ export function Lobby() {
           <div className="grid gap-4">
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
+              <Input id="name" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} className='bg-primary'/>
             </div>
             <div>
               <Label htmlFor="room">Room Name</Label>
-              <Input id="room" placeholder="Enter room name" value={room} onChange={(e) => setRoom(e.target.value)} />
+              <Input id="room" placeholder="Enter room name" value={room} onChange={(e) => setRoom(e.target.value)} className='bg-primary'/>
             </div>
             <div className="flex items-center justify-between">
               <RadioGroup defaultValue="create" className="flex items-center gap-2" onValueChange={setAction}>
@@ -65,12 +65,12 @@ export function Lobby() {
           </div>
         </div>
       </main>
-      <div className="bg-muted px-4 lg:px-6 py-6 flex justify-center">
+      {/* <div className="bg-muted px-4 lg:px-6 py-6 flex justify-center">
         <Button variant="outline" className="flex items-center gap-2">
           <ChromeIcon className="h-5 w-5" />
           Login with Google
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

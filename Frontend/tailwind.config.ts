@@ -83,6 +83,14 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      backgroundColor: {
+        'lobby-background': 'hsl(var(--lobby-background))',
+        'background': 'hsl(var(--background))',
+      },
+      textColor: {
+        'lobby-foreground': 'hsl(var(--lobby-foreground))',
+        'foreground': 'hsl(var(--foreground))',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

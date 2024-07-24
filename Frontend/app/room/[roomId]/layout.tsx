@@ -19,7 +19,7 @@ const workSans = Work_Sans({
 
 const RoomLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang='en'>
-    <body className={`${workSans.className} bg-primary-grey-200`}>
+    <body className={`${workSans.className}`}>
       {children}
     </body>
   </html>
