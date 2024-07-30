@@ -1,6 +1,7 @@
 "use client";
 
 import Room from "@/app/room/[roomId]/Room";
+import Loader from "@/components/Loader";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
@@ -10,12 +11,13 @@ import { useParams } from "next/navigation";
  *
  * we're doing this because we're using a canvas element that can't be pre-rendered by Next.js on the server
  */
-const Board = dynamic(() => import("./Board"), { ssr: false });
+const Board = dynamic(() => import("./Board"), { ssr: false,
+loading: ()=> <Loader />
+});
 
 import React from 'react'
 
 const RoomPage = () => {
-
   const params = useParams<{ roomId: string;  }>();
   const { roomId } = params;
   if (Array.isArray(roomId)) throw new Error(`roomId should be a string not an array /room/[roomId] \n provided value: ${JSON.stringify(roomId, null, 2)}`)
