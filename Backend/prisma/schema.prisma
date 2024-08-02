@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  email            String        @id
+  rooms            UserRoom[]    @relation("UserToUserRooms")
+  ownedRooms       Room[]        @relation("RoomOwner")
+  avatarUri        String?
+  password         String
+  subscription     Subscription? @relation
+  stripeCustomerId String?       @unique
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Room {
+  id         String     @id
+  users      UserRoom[] @relation("RoomToUserRooms")
+  owner      User       @relation("RoomOwner", fields: [ownerEmail], references: [email])
+  ownerEmail String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model UserRoom {
+  id        String @id @default(uuid())
+  user      User   @relation("UserToUserRooms", fields: [userEmail], references: [email])
+  userEmail String
+  room      Room   @relation("RoomToUserRooms", fields: [roomId], references: [id])
+  roomId    String
+  userName  String
+
+  @@unique([userEmail, roomId])
+}
+
+model Subscription {
+  stripeId  String             @id
+  user      User               @relation(fields: [userEmail], references: [email])
+  userEmail String             @unique
+  type      SubscriptionType
+  status    SubscriptionStatus
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model RefreshToken {
+  id        Int   @id @default(autoincrement())
+  token     String   @unique
+  email     String
+  createdAt DateTime @default(now())
+}
+
+model ResetToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  email     String
+  createdAt DateTime  @default(now())
+}
+
+enum SubscriptionType {
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+}
