@@ -5,19 +5,24 @@ import api from '@/lib/axios';
 export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [email, setEmail] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.get('/api/check-auth');
+        const { data, status } = await api.get('/api/check-auth');
         setAuthenticated(true);
-        alert(JSON.stringify(response))
-      } catch (error) {
+        if (status === 200) setEmail(data.email)
+      } catch (error: any) {
         setAuthenticated(false);
-        console.log(error);
-        
-        // router.push('/login');  // Redirect to login page if not authenticated
+        if (error.cause === 401) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          }
+          router.push("/authentication")
+        }
       } finally {
         setLoading(false);
       }
@@ -26,7 +31,7 @@ export const useAuth = () => {
     checkAuth();
   }, [router]);
 
-  return { loading, authenticated };
+  return { loading, authenticated, email };
 };
 
 export default useAuth;
