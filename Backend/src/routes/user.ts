@@ -395,6 +395,7 @@ router.post("/logout", async (req: Request, res: Response) => {
  *         description: Invalid or expired refresh token
  */
 router.post("/refresh", async (req: Request, res: Response) => {
+  
   const { token } = req.body;
   if (!token) return res.status(400).json({ message: "Token is required" });
 
