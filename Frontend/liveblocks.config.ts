@@ -54,6 +54,7 @@ export const {
   suspense: {
     RoomProvider,
     useMyPresence,
+    useUpdateMyPresence,
     useSelf,
     useOthers,
     useBroadcastEvent,
