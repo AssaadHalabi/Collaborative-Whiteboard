@@ -16,23 +16,23 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (error.response.status === 403 && !originalRequest._retry) {
+    if ([401, 403].includes(error.response.status) && !originalRequest._retry) {
+      console.log("error.response.status");
+      console.log(error.response.status);
+      console.log("refreshing");
       originalRequest._retry = true;
       try {
         const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
-        if (!refreshToken) throw new Error('Refresh token not available');
+        if (!refreshToken) throw new Error('Refresh token not available', { cause: 401 });
 
         const response = await api.post('/api/refresh', { token: refreshToken });
-        console.log("/api/refresh");
-        console.log(response.data);
-        
+
         if (typeof window !== 'undefined') {
           localStorage.setItem('accessToken', response.data.accessToken);
         }
         api.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.accessToken;
-        alert("new accessToken")
         return api(originalRequest);
-      } catch (err) {
+      } catch (err: any) {
         return Promise.reject(err);
       }
     }
