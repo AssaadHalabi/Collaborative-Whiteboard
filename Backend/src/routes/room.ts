@@ -181,6 +181,50 @@ router.get(
 
 /**
  * @swagger
+ * /rooms/{id}/users:
+ *   get:
+ *     summary: Retrieve active users in a single room
+ *     tags:
+ *     - rooms
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A single room
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Room'
+ *       404:
+ *         description: Room not found
+ */
+router.get(
+  "/rooms/:id/users",
+  param("id").not().isEmpty().withMessage("Room ID is required"),
+  validate,
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+      const userRooms: UserRoom[] | null = await prisma.userRoom.findMany({
+        where: { roomId: id },
+      });
+      // if (!room) {
+      //   return res.status(404).json({ message: "Room not found" });
+      // }
+      res.json(userRooms);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+/**
+ * @swagger
  * /rooms:
  *   post:
  *     summary: Create a new room
@@ -317,24 +361,44 @@ router.post(
 
     try {
       const room: Room | null = await prisma.room.findUnique({ where: { id } });
-      if (!room) {
+      const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!room || !response.ok) {
+        console.log(room && `DB room found ${id}`)
+        console.log(response.ok && `Liveblocks room found ${id}`)
         return res.status(404).json({ message: "Room not found" });
       }
 
-      const userRoom: UserRoom = await prisma.userRoom.create({
-        data: {
+      const userRoom = await prisma.userRoom.upsert({
+        where: {
+          userEmail_roomId: {
+            userEmail: user.email,
+            roomId: room.id,
+          },
+        },
+        update: {
+          userName: userName,
+        },
+        create: {
           user: { connect: { email: user.email } },
           room: { connect: { id: room.id } },
           userName: userName,
         },
       });
 
-      res.status(200).json({ message: "User joined the room" });
+      res.status(200).json({ message: `User ${userName} joined the room` });
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
     }
   },
 );
+
 
 // /**
 //  * @swagger
@@ -420,12 +484,12 @@ router.delete(
     const { id } = req.params;
     const user = (req as any).user as { email: string };
     try {
-        
+
       const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${process.env.LIVEBLOCKS_PUBLIC_KEY!}`,
-          'Content-Type': 'application/json', 
+          'Content-Type': 'application/json',
         },
       });
 
@@ -435,12 +499,12 @@ router.delete(
 
       const data = await response.json();
       console.log(data);
-      
+
     } catch (error) {
       if (error instanceof Error) {
         console.error();
-      res.status(500).json({ message: `Error deleting room from liveblocks ${error.message}` });
-    }
+        res.status(500).json({ message: `Error deleting room from liveblocks ${error.message}` });
+      }
     }
     try {
       const room = await prisma.room.findUnique({ where: { id } });
