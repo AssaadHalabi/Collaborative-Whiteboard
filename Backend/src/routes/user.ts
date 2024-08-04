@@ -504,6 +504,7 @@ router.get("/check-auth", authenticateToken, (req: Request, res: Response) => {
   const user = (req as any).user;
   res.json({ email: user.email });
 });
+
 /**
  * @swagger
  * components:
