@@ -181,6 +181,95 @@ router.get(
 
 /**
  * @swagger
+ * /owned_rooms:
+ *   get:
+ *     summary: Retrieve rooms a user owns
+ *     tags:
+ *     - rooms
+ *     responses:
+ *       200:
+ *         description: Rooms a user owns
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Room'
+ *       404:
+ *         description: Room not found
+ */
+router.get(
+  "/owned_rooms",
+  validate,
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const user = (req as any).user;
+    try {
+      const rooms: Room[] | null = await prisma.room.findMany({
+        where: { ownerEmail: user.email },
+        include: {
+          users: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      res.json(rooms);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+/**
+ * @swagger
+ * /joined_rooms:
+ *   get:
+ *     summary: Retrieve rooms a user joined
+ *     tags:
+ *     - rooms
+ *     responses:
+ *       200:
+ *         description: Rooms a user joined
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Room'
+ *       404:
+ *         description: Room not found
+ */
+router.get(
+  "/joined_rooms",
+  validate,
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const user = (req as any).user;
+    console.log("user");
+    console.log(user);
+    
+    try {
+      const rooms = await prisma.room.findMany({
+        where: {
+          users: {
+            some: {
+              userEmail: user.email
+            }
+          }
+        },
+        include: {
+          users: true
+        }
+      });
+
+      res.json(rooms);
+    } catch (error) {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+/**
+ * @swagger
  * /rooms/{id}/users:
  *   get:
  *     summary: Retrieve active users in a single room
@@ -194,11 +283,11 @@ router.get(
  *           type: string
  *     responses:
  *       200:
- *         description: A single room
+ *         description: Active users in a single room
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Room'
+ *               $ref: '#/components/schemas/UserRoom'
  *       404:
  *         description: Room not found
  */
@@ -210,12 +299,25 @@ router.get(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
+      const room: Room | null = await prisma.room.findUnique({
+        where: { id },
+      });
       const userRooms: UserRoom[] | null = await prisma.userRoom.findMany({
         where: { roomId: id },
       });
-      // if (!room) {
-      //   return res.status(404).json({ message: "Room not found" });
-      // }
+      
+      // const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}/active_users`, {
+      //   method: "GET",
+      //   headers: {
+      //     'Authorization': `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
+      //     'Content-Type': 'application/json',
+      //   }
+      // });
+      // console.log(await response.text());
+      
+      if (!room) {
+        return res.status(404).json({ message: `Room ID ${id} not found` });
+      }
       res.json(userRooms);
     } catch (error) {
       res.status(500).json({ error: "Internal server error" });
@@ -483,30 +585,25 @@ router.delete(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const user = (req as any).user as { email: string };
-    try {
 
+    try {
+      // Try deleting the room from Liveblocks
       const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${process.env.LIVEBLOCKS_PUBLIC_KEY!}`,
+          'Authorization': `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
           'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) {
+      if (!response.ok && response.status !== 404) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const data = await response.text();
       console.log(data);
 
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error();
-        res.status(500).json({ message: `Error deleting room from liveblocks ${error.message}` });
-      }
-    }
-    try {
+      // If the Liveblocks deletion was successful, continue with the database deletion
       const room = await prisma.room.findUnique({ where: { id } });
 
       if (!room) {
@@ -517,10 +614,25 @@ router.delete(
         return res.status(403).json({ message: "Forbidden, user is not the owner of the room" });
       }
 
+      // Delete related UserRoom entities
+      await prisma.userRoom.deleteMany({
+        where: { roomId: id },
+      });
+
+      // Delete the room
       await prisma.room.delete({ where: { id } });
+
       res.sendStatus(204);
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      // Ensure that the error response is only sent once
+      if (!res.headersSent) {
+        if (error instanceof Error) {
+          console.error(error);
+          res.status(500).json({ message: `Internal server error: ${error.message}` });
+        } else {
+          res.status(500).json({ message: "Internal server error" });
+        }
+      }
     }
   },
 );
