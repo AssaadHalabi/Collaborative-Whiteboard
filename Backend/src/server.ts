@@ -7,12 +7,26 @@ import swaggerUi from "swagger-ui-express";
 import userRoutes from "./routes/user";
 import roomRoutes from "./routes/room";
 import subscriptionRoutes from "./routes/subscription";
+import paymentRoutes from './routes/payment';
 
 const prisma = new PrismaClient({ log: ["query"] });
 const app = express();
 app.use(cors());
-app.use(express.json());
-
+// app.use(express.json());
+// Use JSON parser for all non-webhook routes
+app.use(
+  (
+    req,
+    res,
+    next
+  ) => {
+    if (req.originalUrl === '/api/payment/webhooks/stripe') {
+      next();
+    } else {
+      express.json()(req, res, next);
+    }
+  }
+);
 const server = createServer(app);
 
 // Swagger set up
@@ -41,6 +55,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", userRoutes);
 app.use("/api", roomRoutes);
 app.use("/api", subscriptionRoutes);
+app.use("/api", paymentRoutes);
 
 const port = process.env.PORT || 4000;
 server.listen(port, () => console.log(`Listening on port ${port}`));
