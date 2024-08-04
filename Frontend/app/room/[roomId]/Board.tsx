@@ -3,7 +3,7 @@
 import { fabric } from "fabric";
 import { useEffect, useRef, useState } from "react";
 
-import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
+import { useMutation, useMyPresence, useRedo, useStorage, useUndo } from "@/liveblocks.config";
 import {
   handleCanvaseMouseMove,
   handleCanvasMouseDown,
@@ -24,7 +24,8 @@ import { handleImageUpload } from "@/lib/shapes";
 import { defaultNavElement } from "@/constants";
 import { ActiveElement, Attributes } from "@/types/type";
 
-const Board = () => {
+const Board = ({ email, roomId, userName }: { email: string; roomId: string; userName: string; }) => {
+  console.log(userName);
   
   /**
    * useUndo and useRedo are hooks provided by Liveblocks that allow you to
@@ -489,9 +490,14 @@ const Board = () => {
     });
   }, [canvasObjects]);
 
+
+
   return (
     <main className='h-screen overflow-hidden bg-primary-grey-200'>
       <Navbar
+        email={email}
+        userName={userName}
+        roomId={roomId}
         imageInputRef={imageInputRef}
         activeElement={activeElement}
         handleImageUpload={(e: any) => {
@@ -511,7 +517,7 @@ const Board = () => {
       <section className='flex h-full flex-row'>
         <LeftSidebar allShapes={Array.from(canvasObjects)} />
 
-        <Live canvasRef={canvasRef} undo={undo} redo={redo} />
+        <Live canvasRef={canvasRef} undo={undo} redo={redo} email={email} roomId={roomId} userName={userName} />
 
         <RightSidebar
           elementAttributes={elementAttributes}
