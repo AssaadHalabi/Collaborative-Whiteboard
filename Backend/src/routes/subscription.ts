@@ -80,6 +80,73 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *           format: date-time
  */
 
+
+/**
+ * @swagger
+ * /subscriptions/status:
+ *   get:
+ *     summary: Check subscription status
+ *     tags: 
+ *       - subscriptions
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Subscription status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [ACTIVE, INACTIVE]
+ *                 validUntil:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: No active subscription found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/subscriptions/status", authenticateToken, async (req: Request, res: Response) => {
+  const user = (req as any).user as { email: string };
+
+  try {
+    // Check the local database for subscription
+    const subscription = await prisma.subscription.findUnique({
+      where: { userEmail: user.email },
+    });
+
+    if (!subscription || subscription.status !== SubscriptionStatus.ACTIVE) {
+      return res.status(404).json({ message: "No active subscription found" });
+    }
+
+    // Verify the subscription status with Stripe
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripeId);
+
+    if (stripeSubscription.status !== 'active') {
+      // If the subscription is not active in Stripe, update the local database
+      await prisma.subscription.update({
+        where: { stripeId: subscription.stripeId },
+        data: { status: SubscriptionStatus.INACTIVE },
+      });
+
+      return res.status(404).json({ message: "No active subscription found" });
+    }
+
+    res.json({
+      status: subscription.status,
+      validUntil: new Date(stripeSubscription.current_period_end * 1000), // Convert from UNIX timestamp
+    });
+  } catch (error) {
+    console.error("Error checking subscription status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 /**
  * @swagger
  * /subscriptions:
