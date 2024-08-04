@@ -106,6 +106,7 @@ export type NavbarProps = {
   handleActiveElement: (element: ActiveElement) => void;
   roomId:string;
   email:string;
+  userName:string;
 };
 
 export type ShapesMenuProps = {
