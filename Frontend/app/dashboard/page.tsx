@@ -17,8 +17,8 @@ const Dashboard = () => {
     <div>
       <h1>Dashboard</h1>
 
-      <h1 className='m-14'>{authenticated.toString()} motherfucker</h1>
-      Hello {email} nigger
+      <h1 className='m-14'>{authenticated.toString()}</h1>
+      Hello {email}
     </div>
   );
 };
