@@ -178,7 +178,7 @@ export function Profile() {
                 href="/authentication/forgot-password"
                 className="underline underline-offset-4 text-blue-600 hover:text-blue-800"
               >
-                Forgot Password?
+                Change Password
               </Link>
             </p>
           </div>
