@@ -13,44 +13,51 @@ import { useEffect, useState } from 'react';
 import { Icons } from '@/components/ui/icons';
 import api from '@/lib/axios';
 import NavbarOuter from '../NavbarOuter';
+import useAuth from '@/hooks/useAuth'; // Import the useAuth hook
 
 export function Lobby() {
   const router = useRouter();
+  const { authenticated, loading: authLoading } = useAuth(); // Get authentication status and loading state from the useAuth hook
   const [name, setName] = useState('');
   const [room, setRoom] = useState('');
   const [action, setAction] = useState<'create' | 'join'>('create');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('https://api.liveblocks.io/v2/rooms', {
-          method: 'GET', // or 'POST', 'PUT', etc., depending on the API endpoint requirements
-          headers: {
-            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_LIVEBLOCKS_SECRET_KEY!}`,
-            'Content-Type': 'application/json',
-          },
-        });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch('https://api.liveblocks.io/v2/rooms', {
+  //         method: 'GET', // or 'POST', 'PUT', etc., depending on the API endpoint requirements
+  //         headers: {
+  //           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_LIVEBLOCKS_SECRET_KEY!}`,
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
-        }
+  //       if (!response.ok) {
+  //         throw new Error(`Error: ${response.status} ${response.statusText}`);
+  //       }
 
-        const data = await response.json();
-        console.log(data);
+  //       const data = await response.json();
+  //       console.log(data);
 
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error(error.message);
-        }
-      }
-    };
+  //     } catch (error) {
+  //       if (error instanceof Error) {
+  //         console.error(error.message);
+  //       }
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   const handleSubmit = async () => {
+    if (!authenticated) {
+      router.push("/authentication");
+      return;
+    }
+
     if (room) {
       setLoading(true);
       setError(null);
@@ -71,7 +78,7 @@ export function Lobby() {
 
   return (
     <>
-<NavbarOuter />
+      <NavbarOuter />
 
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
         <div className="w-full max-w-md p-8 mb-12 bg-white shadow-lg rounded-md min-w-fit">
