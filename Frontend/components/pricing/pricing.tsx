@@ -1,17 +1,86 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { CheckIcon } from "./CheckIcon"
-import { XIcon } from "./XIcon"
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
+import useAuth from "@/hooks/useAuth";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CheckIcon } from "./CheckIcon";
+import { XIcon } from "./XIcon";
 import Link from "next/link";
 import Image from "next/image";
+import { Icons } from "@/components/ui/icons";
+import Loader from "../Loader";
+import { useStripe } from '@stripe/react-stripe-js';
 
 export function Pricing() {
+  const stripe = useStripe();
+  const { loading, authenticated } = useAuth();
+  const router = useRouter();
+
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
+  const [signUpLoading, setSignUpLoading] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && authenticated) {
+      fetchSubscriptionStatus();
+    }
+  }, [loading, authenticated, router]);
+
+  const fetchSubscriptionStatus = async () => {
+    try {
+      const response = await api.get('/api/subscriptions/status');
+      setSubscriptionStatus(response.data);
+      setIsPremium(Object.keys(response.data).length>0 && response.data.type === 'PREMIUM' && response.data.status === 'ACTIVE');
+    } catch (error: any) {
+      console.error("Error fetching subscription status:", error);
+      setSubscriptionStatus(null);
+      setIsPremium(false);
+    }
+  };
+
+  const handleSignUp = () => {
+    router.push("/authentication");
+  };
+
+  const handleUpgrade = async () => {
+    if (!authenticated) {
+      router.push("/authentication");
+      return;
+    }
+
+    setUpgradeLoading(true);
+    setError(null);
+    try {
+      if(!stripe) throw new Error(`Stripe is not available, its status is null`)
+      const response = await api.post('/api/create-checkout-session', {
+        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID, 
+    });
+
+    const { sessionId } = response.data;
+    const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+
+    if (stripeError) {
+        setError(stripeError.message!);
+    }
+    } catch (error: any) {
+      console.log(error);
+      setError(`An error occurred during upgrade: ${error.message}`);
+    } finally {
+      setUpgradeLoading(false);
+    }
+  };
+
+  if (loading) return <Loader />;
+
   return (
     <>
       <header className="bg-primary-black px-4 lg:px-6 h-14 flex items-center justify-between">
         <Link href="#" className="flex items-center gap-2" prefetch={false}>
-          {/* <ClapperboardIcon className="size-6 text-primary-foreground" />
-          <span className="text-primary-foreground font-semibold">CollaBoard</span> */}
           <Image src="/assets/logos.svg" alt="Collaboard Logo" width={140} height={100} />
         </Link>
         <p className="text-primary-foreground text-sm font-medium">Collaborative Whiteboard</p>
@@ -24,6 +93,7 @@ export function Pricing() {
               Bring your team together with a powerful whiteboard tool.
             </p>
           </div>
+          {error && <p className="text-red-600 text-center">{error}</p>}
           <div className="grid md:grid-cols-2 lg:g2">
             <Card>
               <CardHeader>
@@ -51,7 +121,22 @@ export function Pricing() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="bg-black text-white w-full">Sign Up</Button>
+                {(!isPremium) ? (
+                  <Button variant="black" className="w-full" disabled>
+                    Current Plan
+                  </Button>
+                ) : (
+                  !authenticated ? (
+                    <Button 
+                      variant="black" className="w-full" 
+                      onClick={handleSignUp} 
+                      disabled={signUpLoading}
+                    >
+                      {signUpLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                      Sign Up
+                    </Button>
+                  ) : null
+                )}
               </CardFooter>
             </Card>
             <Card>
@@ -82,7 +167,21 @@ export function Pricing() {
               <CardFooter className="flex flex-row items-center justify-between">
                 <div className="text-4xl font-bold">$9.99</div>
                 <div className="text-sm text-muted-foreground">/month</div>
-                <Button className="bg-black text-white w-full ml-2">Upgrade</Button>
+                {isPremium ? (
+                  <Button variant="black" className="w-full ml-2" disabled>
+                    Current Plan
+                  </Button>
+                ) : (
+                  <Button 
+                  variant="black"
+                    className="w-full ml-2" 
+                    onClick={handleUpgrade} 
+                    disabled={upgradeLoading}
+                  >
+                    {upgradeLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                    Upgrade
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </div>
@@ -91,6 +190,5 @@ export function Pricing() {
     </>
   )
 }
-
 
 export default Pricing;
