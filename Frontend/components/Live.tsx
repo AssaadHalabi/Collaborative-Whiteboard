@@ -15,23 +15,35 @@ type Props = {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   undo: () => void;
   redo: () => void;
+  email: string;
+  userName: string;
+  roomId: string;
 };
 
-const Live = ({ canvasRef, undo, redo }: Props) => {
+const Live = ({ canvasRef, undo, redo, email, roomId, userName }: Props) => {
   /**
    * useOthers returns the list of other users in the room.
    *
    * useOthers: https://liveblocks.io/docs/api-reference/liveblocks-react#useOthers
-   */
+  */
   const others = useOthers();
+  // console.log(others.length && others[0].connectionId);
+  // console.log(others.length && `Live others after update others: ${JSON.stringify(others[0].presence, null, 2)}`);
 
+  
   /**
    * useMyPresence returns the presence of the current user in the room.
    * It also returns a function to update the presence of the current user.
    *
    * useMyPresence: https://liveblocks.io/docs/api-reference/liveblocks-react#useMyPresence
    */
-  const [{ cursor }, updateMyPresence] = useMyPresence() as any;
+  const [{ cursor, email:currentEmail }, updateMyPresence] = useMyPresence() as any;
+
+  // console.log(`Live currentUser before update currentUser: ${currentEmail}`);
+  // updateMyPresence({email});
+  // console.log(`Live currentUser after update currentUser: ${currentEmail}`);
+
+  
 
   /**
    * useBroadcastEvent is used to broadcast an event to all the other users in the room.
@@ -110,8 +122,8 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
           message: "",
         });
       } else if (e.key === "Escape") {
-        updateMyPresence({ message: "" });
-        setCursorState({ mode: CursorMode.Hidden });
+        // updateMyPresence({ message: "",  email});
+        // setCursorState({ mode: CursorMode.Hidden });
       } else if (e.key === "e") {
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
@@ -148,6 +160,9 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
           x,
           y,
         },
+      message: userName,
+        email,
+        userName
       });
     }
   }, []);
@@ -159,7 +174,8 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
     });
     updateMyPresence({
       cursor: null,
-      message: null,
+      message: userName,
+      email
     });
   }, []);
 
@@ -175,6 +191,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
           x,
           y,
         },
+        email
       });
 
       // if cursor is in reaction mode, set isPressed to true
@@ -253,6 +270,7 @@ const Live = ({ canvasRef, undo, redo }: Props) => {
             cursorState={cursorState}
             setCursorState={setCursorState}
             updateMyPresence={updateMyPresence}
+            email={email}
           />
         )}
 
