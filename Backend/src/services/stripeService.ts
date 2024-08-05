@@ -58,15 +58,15 @@ export const createCheckoutSession = async (priceId: string, customerEmail: stri
             },
         ],
         mode: 'subscription',
-        success_url: `${process.env.FRONTEND_URL}/success`,
-        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        success_url: `${process.env.FRONTEND_URL}/profile`,
+        cancel_url: `${process.env.FRONTEND_URL}/pricing`,
         customer_email: customerEmail,
     });
     console.log(session.subscription);
     return session;
 };
 
-export const getSubscription = async (email: string): Promise<void> => {
+export const getSubscription = async (email: string): Promise<Stripe.Subscription> => {
     const customers = await stripe.customers.list({
         email: email,
         limit: 1
@@ -85,13 +85,14 @@ export const getSubscription = async (email: string): Promise<void> => {
     console.log('current_period_end:', convertUnixToDate(subscription.current_period_end));
     console.log('current_period_start:', convertUnixToDate(subscription.current_period_start));
     console.log('start_date:', convertUnixToDate(subscription.start_date));
-    console.log('plan.created:', convertUnixToDate(subscription.plan.created));
-    console.log('current_period_start less than current_period_end:', new Date(convertUnixToDate(subscription.current_period_end)) - new Date(convertUnixToDate(subscription.start_date)));
+    // console.log('plan.created:', convertUnixToDate(subscription.plan.created));
+    // console.log('current_period_start less than current_period_end:', new Date(convertUnixToDate(subscription.current_period_end)) - new Date(convertUnixToDate(subscription.start_date)));
     
     if (isSubscriptionValid(subscription)) {
         console.log('The subscription is still valid.');
     } else {
         console.log('The subscription is no longer valid.');
     }
+    return subscription
 };
 
