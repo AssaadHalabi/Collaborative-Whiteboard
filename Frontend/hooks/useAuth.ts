@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 
-export const useAuth = () => {
+export const useAuth = (protect = false) => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState("");
@@ -21,7 +21,7 @@ export const useAuth = () => {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
           }
-          router.push("/authentication")
+          if(protect) router.push("/authentication")
         }
       } finally {
         setLoading(false);
