@@ -15,7 +15,7 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 const router = Router();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+const stripe = new Stripe(process.env.STRIPE_TEST_SECRET_KEY || "");
 
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "youraccesstokensecret";
@@ -107,7 +107,7 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *       401:
  *         description: Unauthorized
  *       404:
- *         description: No active subscription found
+ *         description: No active premium subscription found
  *       500:
  *         description: Internal server error
  */
@@ -120,8 +120,8 @@ router.get("/subscriptions/status", authenticateToken, async (req: Request, res:
       where: { userEmail: user.email },
     });
 
-    if (!subscription || subscription.status !== SubscriptionStatus.ACTIVE) {
-      return res.status(404).json({ message: "No active subscription found" });
+    if (!subscription || subscription.type !== SubscriptionType.PREMIUM || subscription.status !== SubscriptionStatus.ACTIVE) {
+      return res.status(404).json({ message: "No active premium subscription found" });
     }
 
     // Verify the subscription status with Stripe
@@ -134,11 +134,12 @@ router.get("/subscriptions/status", authenticateToken, async (req: Request, res:
         data: { status: SubscriptionStatus.INACTIVE },
       });
 
-      return res.status(404).json({ message: "No active subscription found" });
+      return res.status(404).json({ message: "No active premium subscription found" });
     }
 
     res.json({
       status: subscription.status,
+      type: subscription.type,
       validUntil: new Date(stripeSubscription.current_period_end * 1000), // Convert from UNIX timestamp
     });
   } catch (error) {
