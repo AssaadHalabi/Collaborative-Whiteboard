@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import useAuth from "@/hooks/useAuth";
 import api from "@/lib/axios";
 import dynamic from "next/dynamic";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 /**
  * disable ssr to avoid pre-rendering issues of Next.js
@@ -26,7 +26,10 @@ const RoomPage = () => {
   if (Array.isArray(roomId)) throw new Error(`roomId should be a string not an array /room/[roomId] \n provided value: ${JSON.stringify(roomId, null, 2)}`);
   const { loading, authenticated, email } = useAuth();
   const [userName, setUserName] = useState<string>("");
+  const router = useRouter();
 
+
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -57,7 +60,11 @@ const RoomPage = () => {
   if (loading) {
     return <Loader />;
   }
-  if (!authenticated) return null;
+  useEffect(() => {
+    if (!loading && !authenticated) {
+      router.push("/authentication");
+    }
+  }, [loading, authenticated, router]);
 
   return (
     <Room roomId={roomId}>
