@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Icons } from "@/components/ui/icons";
 import { NavbarOuter } from "../NavbarOuter";
+import Link from "next/link";
 
 const roomsPerPage = 2;
 
@@ -170,6 +171,16 @@ export function Profile() {
             >
               Change Avatar
             </Button>
+          </div>
+          <div>
+          <p className="text-sm text-gray-600 mt-4">
+              <Link
+                href="/authentication/forgot-password"
+                className="underline underline-offset-4 text-blue-600 hover:text-blue-800"
+              >
+                Forgot Password?
+              </Link>
+            </p>
           </div>
         </div>
 
