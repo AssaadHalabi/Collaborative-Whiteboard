@@ -1,13 +1,16 @@
 "use client"
 import { Metadata } from "next"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/authentication/button"
 import { UserAuthForm } from "@/app/authentication/UserAuthForm"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import NavbarOuter from "@/components/NavbarOuter"
+import useAuth from "@/hooks/useAuth"
+import Loader from "@/components/Loader"
 
 const metadata: Metadata = {
   title: "CollaBoard - Auth",
@@ -15,15 +18,25 @@ const metadata: Metadata = {
 }
 
 export default function AuthenticationPage() {
+  const { loading, authenticated } = useAuth();
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+
+  useEffect(() => {
+    if (!loading && authenticated) {
+      router.push("/profile");
+    }
+  }, [loading, authenticated, router]);
 
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
   };
 
+  if (loading) return <Loader />;
+
   return (
     <>
-<NavbarOuter />
+      <NavbarOuter />
 
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
         <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-md">
