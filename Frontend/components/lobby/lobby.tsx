@@ -12,6 +12,7 @@ import { ClapperboardIcon } from "./ClapperboardIcon";
 import { useEffect, useState } from 'react';
 import { Icons } from '@/components/ui/icons';
 import api from '@/lib/axios';
+import NavbarOuter from '../NavbarOuter';
 
 export function Lobby() {
   const router = useRouter();
@@ -70,12 +71,8 @@ export function Lobby() {
 
   return (
     <>
-      <header className="bg-primary-black px-4 lg:px-6 h-14 flex items-center justify-between">
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
-          <Image src="/assets/logos.svg" alt="Collaboard Logo" width={140} height={100} />
-        </Link>
-        <p className="text-primary-foreground text-sm font-medium">Collaborative Whiteboard</p>
-      </header>
+<NavbarOuter />
+
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
         <div className="w-full max-w-md p-8 mb-12 bg-white shadow-lg rounded-md min-w-fit">
           <h2 className="text-2xl font-semibold text-center capitalize">{action} Room</h2>

@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/authentication/button"
 import { UserAuthForm } from "@/app/authentication/UserAuthForm"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import NavbarOuter from "@/components/NavbarOuter"
 
 const metadata: Metadata = {
   title: "CollaBoard - Auth",
@@ -22,6 +23,8 @@ export default function AuthenticationPage() {
 
   return (
     <>
+<NavbarOuter />
+
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
         <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-md">
           <div className="flex flex-col space-y-2 text-center">

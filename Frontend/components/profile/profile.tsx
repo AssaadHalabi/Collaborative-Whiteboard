@@ -24,8 +24,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Icons } from "@/components/ui/icons";
-import Link from "next/link";
-import Image from "next/image";
+import { NavbarOuter } from "../NavbarOuter";
 
 const roomsPerPage = 2;
 
@@ -150,12 +149,7 @@ export function Profile() {
 
   return (
     <>
-    <header className="bg-primary-black px-4 lg:px-6 h-14 flex items-center justify-between">
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
-          <Image src="/assets/logos.svg" alt="Collaboard Logo" width={140} height={100} />
-        </Link>
-        <p className="text-primary-foreground text-sm font-medium">Collaborative Whiteboard</p>
-      </header>
+    <NavbarOuter />
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="grid gap-8">
         <div className="bg-background rounded-lg p-6 shadow">
