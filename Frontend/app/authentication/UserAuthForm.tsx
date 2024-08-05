@@ -1,62 +1,70 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useState } from "react"
-import { useRouter } from 'next/navigation' // Note: Changed to next/navigation for useRouter
-import api from '@/lib/axios'
+import * as React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
 
-import { cn } from "@/lib/utils"
-import { Icons } from "@/components/ui/icons"
-import { Button } from "@/components/authentication/button"
-import { Input } from "@/components/authentication/input"
-import { Label } from "@/components/authentication/label"
-import axios from "axios"
+import { cn } from "@/lib/utils";
+import { Icons } from "@/components/ui/icons";
+import { Button } from "@/components/authentication/button";
+import { Input } from "@/components/authentication/input";
+import { Label } from "@/components/authentication/label";
+import axios from "axios";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   isLogin: boolean;
 }
 
 export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [avatarUri, setAvatarUri] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [avatarUri, setAvatarUri] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(event: React.SyntheticEvent) {
-    event.preventDefault()
-    setIsLoading(true)
-    setError(null)
+    event.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
       if (isLogin) {
-        const response = await api.post('/api/login', { email, password });
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('accessToken', response.data.accessToken);
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-        }
+        await handleLogin();
       } else {
-        await api.post('/api/users', { email, password, avatarUri });
+        await handleSignUp();
       }
-      router.push('/');  // Redirect to the lobby or another page
+      router.push("/profile"); // Redirect to the profile
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          const { data } = err.response;
-          if (data.errors) {
-            setError(data.errors.map((error: any) => error.msg).join(', '));
-          } else if (data.message) {
-            setError(data.message);
-          }
-        } else {
-          setError(err.message);
-        }
-      } else {
-        setError('An unexpected error occurred');
-      }
+      handleError(err);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleLogin() {
+    const response = await api.post("/api/login", { email, password });
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", response.data.accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+    }
+  }
+
+  async function handleSignUp() {
+    const signUpResponse = await api.post("/api/users", { email, password, avatarUri });
+    if (signUpResponse.status === 201) {
+      await handleLogin();
+    }
+  }
+
+  function handleError(err: any) {
+    if (axios.isAxiosError(err)) {
+      const { data } = err.response || {};
+      const errorMessage = data?.errors?.map((error: any) => error.msg).join(", ") || data?.message || err.message;
+      setError(errorMessage);
+    } else {
+      setError("An unexpected error occurred");
     }
   }
 
@@ -82,7 +90,7 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
               required
             />
           </div>
-          
+
           <div className="grid gap-1">
             <Label className="sr-only" htmlFor="password">
               Password
@@ -127,10 +135,11 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
               {error}
             </div>
           )}
-          
+
           <Button 
             className="w-full py-2 bg-black text-white rounded-md hover:bg-accent-foreground/90"
-            disabled={isLoading}>
+            disabled={isLoading}
+          >
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
@@ -144,5 +153,5 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
         </div>
       </div>
     </div>
-  )
+  );
 }
