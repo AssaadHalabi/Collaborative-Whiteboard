@@ -8,7 +8,7 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 const router = Router();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+const stripe = new Stripe(process.env.STRIPE_TEST_SECRET_KEY || "");
 
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "youraccesstokensecret";
@@ -373,7 +373,7 @@ router.post(
       }
 
       const hasActiveSubscription =
-        userData.subscription && userData.subscription.status === "ACTIVE";
+        userData.subscription && userData.subscription.type === "PREMIUM" && userData.subscription.status === "ACTIVE";
 
       const ownedRoomsCount = await prisma.room.count({
         where: { ownerEmail: user.email },
