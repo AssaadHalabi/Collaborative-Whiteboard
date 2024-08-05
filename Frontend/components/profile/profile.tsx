@@ -23,7 +23,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Icons } from "@/components/ui/icons"; // Import the Icons component
+import { Icons } from "@/components/ui/icons";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -44,6 +44,9 @@ export function Profile() {
   const [subscription, setSubscription] = useState(null);
   const [joinLoading, setJoinLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState("");
+  const [ownedRoomsLoading, setOwnedRoomsLoading] = useState(true);
+  const [joinedRoomsLoading, setJoinedRoomsLoading] = useState(true);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !authenticated) {
@@ -60,34 +63,43 @@ export function Profile() {
   }, [authenticated, ownedRoomsPage, joinedRoomsPage]);
 
   const fetchOwnedRooms = async () => {
+    setOwnedRoomsLoading(true);
     try {
       const response = await api.get("/api/owned_rooms");
       setOwnedRooms(response.data);
     } catch (error) {
       console.error("Error fetching owned rooms:", error);
+    } finally {
+      setOwnedRoomsLoading(false);
     }
   };
 
   const fetchJoinedRooms = async () => {
+    setJoinedRoomsLoading(true);
     try {
       const response = await api.get("/api/joined_rooms");
       setJoinedRooms(response.data);
     } catch (error) {
       console.error("Error fetching joined rooms:", error);
+    } finally {
+      setJoinedRoomsLoading(false);
     }
   };
 
   const fetchSubscriptionStatus = async () => {
+    setSubscriptionLoading(true);
     try {
       const response = await api.get("/api/subscriptions/status");
       setSubscription(response.data);
     } catch (error) {
       console.error("Error fetching subscription status:", error);
+    } finally {
+      setSubscriptionLoading(false);
     }
   };
 
   const handleCreateRoom = async () => {
-        router.push("/");
+    router.push("/");
   };
 
   const handleJoinRoom = (roomId, userName) => {
@@ -175,7 +187,9 @@ export function Profile() {
               Create Room
             </Button>
           </div>
-          {ownedRooms.length > 0 ? (
+          {ownedRoomsLoading ? (
+            <div className="flex justify-center"><Icons.spinner className="mr-2 h-6 w-6 animate-spin" /></div>
+          ) : ownedRooms.length > 0 ? (
             <>
               <div className="grid gap-4">
                 {paginate(ownedRooms, ownedRoomsPage).map((room) => {
@@ -267,7 +281,9 @@ export function Profile() {
 
         <div className="bg-background rounded-lg p-6 shadow">
           <div className="font-semibold mb-4">Joined Rooms</div>
-          {joinedRooms.length > 0 ? (
+          {joinedRoomsLoading ? (
+            <div className="flex justify-center"><Icons.spinner className="mr-2 h-6 w-6 animate-spin" /></div>
+          ) : joinedRooms.length > 0 ? (
             <>
               <div className="grid gap-4">
                 {paginate(joinedRooms, joinedRoomsPage).map((room) => {
@@ -354,7 +370,11 @@ export function Profile() {
         <div className="bg-background rounded-lg p-6 shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="font-semibold">Subscription</div>
-            {!subscription && <Button variant="green">Subscribe</Button>}
+            {subscriptionLoading ? (
+              <Icons.spinner className="mr-2 h-6 w-6 animate-spin" />
+            ) : !subscription && (
+              <Button variant="green">Subscribe</Button>
+            )}
           </div>
           <div className="grid gap-2">
             {subscription ? (
