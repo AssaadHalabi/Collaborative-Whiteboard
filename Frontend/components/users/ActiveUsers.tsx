@@ -8,7 +8,7 @@ import { useOthers, useSelf, useUpdateMyPresence } from "@/liveblocks.config";
 import Avatar from "./Avatar";
 import api from "@/lib/axios";
 
-const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; userName:string}) => {
+const ActiveUsers = ({roomId, email, userName, avatarURL}: {roomId:string; email:string; userName:string; avatarURL:string}) => {
   /**
    * useOthers returns the list of other users in the room.
    *
@@ -16,6 +16,7 @@ const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; us
    */
   const others = useOthers();
 
+  // console.log(others.length && others[0].presence);
   
   const [userNames, setUserNames] = useState<{ [key: string]: string }>({});
   
@@ -28,8 +29,8 @@ const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; us
           throw new Error(`Error: ${data.error} ${statusText}`);
         }
 
-        console.log("data");
-        console.log(data);
+        // console.log("data");
+        // console.log(data);
         
         const names = data.reduce((acc: { [key: string]: string }, user: { userEmail: string; userName: string }) => {
           acc[user.userEmail] = user.userName; // Storing username with email key
@@ -37,8 +38,8 @@ const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; us
         }, {});
 
         setUserNames(names);
-        console.log("names");
-        console.log(names);
+        // console.log("names");
+        // console.log(names);
       } catch (error) {
         if (error instanceof Error) {
           console.error(error.message);
@@ -59,11 +60,9 @@ const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; us
   
   const updateMyPresence = useUpdateMyPresence();
 
-  // console.log(`Live currentUser before update currentUser: ${email}`);
   useEffect(() => {
-    updateMyPresence({ email, userName, message:userName });
-  }, [email, userName, updateMyPresence, others.length]);
-  // console.log(`Active users currentUser: ${JSON.stringify(currentUser.presence, null, 2)}`);
+    updateMyPresence({ email, userName, avatarURL, message:userName });
+  }, [email, userName, avatarURL, updateMyPresence, others.length]);
   
 
   // memoize the result of this function so that it doesn't change on every render but only when there are new users joining the room
@@ -73,12 +72,13 @@ const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; us
     return (
       <div className='flex items-center justify-center gap-1'>
         {currentUser && (
-          <Avatar name={`${(currentUser.presence as any).userName}(You)`} otherStyles='border-[3px] border-primary-green' />
+          <Avatar name={`${(currentUser.presence as any).userName}(You)`} avatarURL={avatarURL} otherStyles='border-[3px] border-primary-green' />
         )}
 
         {others.slice(0, 2).map(({ connectionId, presence }) => (
           <Avatar
             key={connectionId}
+            avatarURL={(presence as any).avatarURL}
             name={(presence as any).userName || generateRandomName()}
             otherStyles='-ml-3'
           />
@@ -91,7 +91,7 @@ const ActiveUsers = ({roomId, email, userName}: {roomId:string; email:string; us
         )}
       </div>
     );
-  }, [others.length, userName, email, updateMyPresence, (currentUser.presence as any).userName]);
+  }, [others.length, userName, avatarURL, email, updateMyPresence, (currentUser.presence as any).userName, (currentUser.presence as any).avatarURL]);
 
   return memoizedUsers;
 };
