@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import api from "@/lib/axios";
 
-const Navbar = ({ activeElement, imageInputRef, handleImageUpload, handleActiveElement, roomId, email, userName }: NavbarProps) => {
+const Navbar = ({ activeElement, imageInputRef, handleImageUpload, handleActiveElement, roomId, email, userName, avatarURL }: NavbarProps) => {
   const router = useRouter();
 
   const isActive = (value: string | Array<ActiveElement>) =>
@@ -132,7 +132,7 @@ const Navbar = ({ activeElement, imageInputRef, handleImageUpload, handleActiveE
         ))}
       </ul>
 
-      <ActiveUsers roomId={roomId} email={email} userName={userName} />
+      <ActiveUsers roomId={roomId} email={email} userName={userName} avatarURL={avatarURL} />
     </nav>
   );
 };
