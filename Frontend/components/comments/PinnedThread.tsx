@@ -53,7 +53,7 @@ export const PinnedThread = ({ thread, onFocus, ...props }: Props) => {
           data-draggable={true}
         >
           <Image
-            src={`https://liveblocks.io/avatars/avatar-${Math.floor(Math.random() * 30)}.png`}
+            src={`/assets/avatar-${Math.floor(Math.random() * 30)}.png`}
             alt='Dummy Name'
             width={28}
             height={28}
