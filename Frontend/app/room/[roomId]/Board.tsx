@@ -24,8 +24,9 @@ import { handleImageUpload } from "@/lib/shapes";
 import { defaultNavElement } from "@/constants";
 import { ActiveElement, Attributes } from "@/types/type";
 
-const Board = ({ email, roomId, userName }: { email: string; roomId: string; userName: string; }) => {
-  console.log(userName);
+const Board = ({ email, roomId, userName, avatarURL }: { email: string; roomId: string; userName: string; avatarURL: string }) => {
+  // console.log(userName);
+  // console.log(avatarURL);
   
   /**
    * useUndo and useRedo are hooks provided by Liveblocks that allow you to
@@ -495,6 +496,7 @@ const Board = ({ email, roomId, userName }: { email: string; roomId: string; use
   return (
     <main className='h-screen overflow-hidden bg-primary-grey-200'>
       <Navbar
+        avatarURL={avatarURL}
         email={email}
         userName={userName}
         roomId={roomId}
