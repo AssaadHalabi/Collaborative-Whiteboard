@@ -14,6 +14,7 @@ import { Icons } from '@/components/ui/icons';
 import api from '@/lib/axios';
 import NavbarOuter from '../NavbarOuter';
 import useAuth from '@/hooks/useAuth'; // Import the useAuth hook
+import Loader from '../Loader';
 
 export function Lobby() {
   const router = useRouter();
@@ -75,6 +76,8 @@ export function Lobby() {
       }
     }
   };
+
+  if(authLoading) return <Loader />
 
   return (
     <>
