@@ -107,6 +107,7 @@ export type NavbarProps = {
   roomId:string;
   email:string;
   userName:string;
+  avatarURL:string;
 };
 
 export type ShapesMenuProps = {

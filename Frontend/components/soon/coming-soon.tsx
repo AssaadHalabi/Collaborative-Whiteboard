@@ -1,8 +1,11 @@
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import NavbarOuter from "../NavbarOuter";
 export function ComingSoon() {
   return (
+<>
+<NavbarOuter />
     <div className="flex flex-col items-center justify-center min-h-dvh bg-gradient-to-br from-primary-grey-200 to-primary-foreground">
       <div className="max-w-2xl px-4 py-12 text-center sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold tracking-tight text-secondary-foreground sm:text-5xl lg:text-6xl">
@@ -22,6 +25,7 @@ export function ComingSoon() {
         </div> */}
       </div>
     </div>
+</>
   )
 }
 

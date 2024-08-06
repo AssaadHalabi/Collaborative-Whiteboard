@@ -4,16 +4,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type Props = {
   name: string;
+  avatarURL: string;
   otherStyles?: string;
 };
 
-const Avatar = ({ name, otherStyles }: Props) => (
+const Avatar = ({ name, avatarURL, otherStyles }: Props) => (
   <>
     <Tooltip>
       <TooltipTrigger>
         <div className={`relative h-9 w-9 rounded-full ${otherStyles}`} data-tooltip={name}>
           <Image
-            src={`https://liveblocks.io/avatars/avatar-${Math.floor(Math.random() * 30)}.png`}
+            src={avatarURL}
             fill
             className="rounded-full"
             alt={name}

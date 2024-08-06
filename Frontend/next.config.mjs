@@ -16,6 +16,11 @@ const nextConfig = {
         hostname: "liveblocks.io",
         port: "",
       },
+      {
+        protocol: "https",
+        hostname: "collaboard-avatars.s3.eu-north-1.amazonaws.com",
+        port: "",
+      },
     ],
   },
   typescript: {

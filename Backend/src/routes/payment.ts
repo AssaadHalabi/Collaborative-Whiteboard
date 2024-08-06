@@ -50,14 +50,10 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *       type: object
  *       required:
  *         - priceId
- *         - email
  *       properties:
  *         priceId:
  *           type: string
  *           description: The price ID of the product
- *         email:
- *           type: string
- *           description: The email of the customer
  */
 
 /**
@@ -65,7 +61,7 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  * /create-checkout-session:
  *   post:
  *     summary: Create a checkout session
- *     tags: [Payment]
+ *     tags: [payment]
  *     requestBody:
  *       required: true
  *       content:
@@ -88,7 +84,6 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *         description: Server error
  */
 router.post('/create-checkout-session',
-
   body("priceId").not().isEmpty().withMessage("stripe product priceId is required"),
   authenticateToken, validate, async (req: Request, res: Response) => {
     const user = (req as any).user;
@@ -114,7 +109,7 @@ router.post('/create-checkout-session',
  * /webhooks/stripe:
  *   post:
  *     summary: Handle Stripe webhooks
- *     tags: [Payment]
+ *     tags: [payment]
  *     responses:
  *       200:
  *         description: Webhook handled

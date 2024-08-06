@@ -13,6 +13,7 @@ import Image from "next/image";
 import { Icons } from "@/components/ui/icons";
 import Loader from "../Loader";
 import { useStripe } from '@stripe/react-stripe-js';
+import NavbarOuter from "../NavbarOuter";
 
 export function Pricing() {
   const stripe = useStripe();
@@ -79,12 +80,8 @@ export function Pricing() {
 
   return (
     <>
-      <header className="bg-primary-black px-4 lg:px-6 h-14 flex items-center justify-between">
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
-          <Image src="/assets/logos.svg" alt="Collaboard Logo" width={140} height={100} />
-        </Link>
-        <p className="text-primary-foreground text-sm font-medium">Collaborative Whiteboard</p>
-      </header>
+<NavbarOuter />
+
       <div className="w-full max-w-6xl mx-auto py-12 md:py-20 lg:py-24 px-4 md:px-6">
         <div className="grid gap-8 md:gap-12 lg:gap-16">
           <div className="text-center space-y-4">

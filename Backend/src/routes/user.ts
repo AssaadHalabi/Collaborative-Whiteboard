@@ -5,11 +5,21 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { UserDto } from "../../types/User";
 import { sendEmail } from "../services/emailSerice";
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { parseS3Uri } from "../utils/parseS3Uri";
+import { createS3Uri } from "../utils/createS3Uri";
 
 const prisma = new PrismaClient({ log: ["query"] });
 
 const router = Router();
-
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "youraccesstokensecret";
 const REFRESH_TOKEN_SECRET =
@@ -59,6 +69,34 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *         - password
  */
 
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CreateUser:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ *         avatarImageName:
+ *           type: string
+ *       required:
+ *         - email
+ *         - password
+ *         - avatarImageName
+ *     UpdateUser:
+ *       type: object
+ *       properties:
+ *         avatarImageName:
+ *           type: string
+ *       required:
+ *         - avatarImageName
+ */
+
+
 /**
  * @swagger
  * /users:
@@ -94,7 +132,7 @@ router.get("/users", authenticateToken, async (req: Request, res: Response) => {
  *   get:
  *     summary: Retrieve a single user
  *     tags:
- *     - users
+ *       - users
  *     parameters:
  *       - in: path
  *         name: email
@@ -118,19 +156,34 @@ router.get(
   authenticateToken,
   async (req: Request, res: Response) => {
     const { email } = req.params;
-    const user: UserDto | null = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        email: true,
-        avatarUri: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          email: true,
+          avatarUri: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      let avatarURL = null
+      if(user.avatarUri ){
+        const command = new GetObjectCommand(parseS3Uri(user.avatarUri)
+        );
+
+      avatarURL = await getSignedUrl(s3Client, command, { expiresIn: 604800 });}
+
+      res.json({
+        ...user,
+        avatarURL,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "An error occurred while retrieving the user" });
     }
-    res.json(user);
   },
 );
 
@@ -177,11 +230,78 @@ router.post(
 
 /**
  * @swagger
+ * /generate-upload-url:
+ *   post:
+ *     summary: Generate a pre-signed URL for uploading an image to S3
+ *     tags:
+ *       - Upload
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - avatarImageName
+ *               - avatarImageType
+ *             properties:
+ *               avatarImageName:
+ *                 type: string
+ *                 description: The name of the image to be uploaded
+ *               avatarImageType:
+ *                 type: string
+ *                 description: The MIME type of the image to be uploaded
+ *     responses:
+ *       200:
+ *         description: The pre-signed URL for image upload
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 url:
+ *                   type: string
+ *                   description: The pre-signed URL
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
+router.post(
+  '/generate-upload-url',
+  body('avatarImageName').not().isEmpty().withMessage('avatarImageName is required'),
+  body('avatarImageType').not().isEmpty().withMessage('avatarImageType is required'),
+  validate,
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const { avatarImageName, avatarImageType } = req.body;
+
+    try {
+      const params = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME!,
+        Key: avatarImageName,
+        ContentType: avatarImageType,
+      };
+
+      const command = new PutObjectCommand(params);
+      const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+
+      console.log('[INFO_POST_AVATAR_IMAGE_UPLOAD_PRESIGNED_URL] AOA FEATURE UPLOAD URL created successfully');
+      return res.status(200).json({ url });
+    } catch (error: any) {
+      console.error(`[ERROR_POST_AVATAR_IMAGE_UPLOAD_PRESIGNED_URL] ${error.message}`);
+      return res.status(500).json({message: error.message});
+    }
+  }
+);
+
+/**
+ * @swagger
  * /users/{email}:
  *   put:
  *     summary: Update a user
  *     tags:
- *     - users
+ *       - users
  *     parameters:
  *       - in: path
  *         name: email
@@ -193,7 +313,7 @@ router.post(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             $ref: '#/components/schemas/UpdateUser'
  *     responses:
  *       200:
  *         description: The updated user
@@ -209,14 +329,15 @@ router.post(
 router.put(
   "/users/:email",
   param("email").isEmail().withMessage("Invalid email format"),
-  body("avatarUri").not().isEmpty().withMessage("Avatar is required"),
+  body("avatarImageName").not().isEmpty().withMessage("avatarImageName is required"),
   validate,
   authenticateToken,
   async (req: Request, res: Response) => {
     const { email } = req.params;
-    const { avatarUri } = req.body;
+    const { avatarImageName } = req.body;
+    const avatarUri = createS3Uri(avatarImageName);
     try {
-      const oldUser: UserDto | null = await prisma.user.findUnique({
+      const oldUser = await prisma.user.findUnique({
         where: { email },
         select: {
           email: true,
@@ -225,17 +346,20 @@ router.put(
           updatedAt: true,
         },
       });
-      if (!oldUser) throw new Error();
-      const user: UserDto = await prisma.user.update({
+      if (!oldUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const user = await prisma.user.update({
         where: { email },
-        data: { avatarUri: avatarUri || oldUser.avatarUri },
+        data: { avatarUri },
       });
       res.json({ email: user.email, avatarUri: user.avatarUri });
     } catch (error) {
-      res.status(404).json({ message: "User not found" });
+      res.status(500).json({ message: "An error occurred while updating the user" });
     }
   },
 );
+
 
 /**
  * @swagger
