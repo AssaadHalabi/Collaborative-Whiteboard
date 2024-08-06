@@ -30,9 +30,9 @@ export const NavbarOuter = () => {
         router.push('/authentication');
       }
       router.push('/authentication');
-
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error logging out:', error);
+      if(error.message ==="Token is required") router.push('/authentication');
     }
   };
 
