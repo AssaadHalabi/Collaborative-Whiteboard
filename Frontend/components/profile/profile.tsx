@@ -31,7 +31,7 @@ import axios from "axios";
 const roomsPerPage = 2;
 
 export function Profile() {
-  const { loading, authenticated, email } = useAuth();
+  const { loading, authenticated, email } = useAuth(true);
   const router = useRouter();
 
   const [ownedRooms, setOwnedRooms] = useState([]);
@@ -49,7 +49,6 @@ export function Profile() {
   const [joinedRoomsLoading, setJoinedRoomsLoading] = useState(true);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [avatarImage, setAvatarImage] = useState(null);
-  // const [avatarURL, setAvatarUrl] = useState("/placeholder-user.jpg");
   const [avatarURL, setAvatarUrl] = useState(`/assets/avatar-${Math.floor(Math.random() * 30)}.png`);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -62,12 +61,18 @@ export function Profile() {
 
   useEffect(() => {
     if (authenticated) {
-      fetchOwnedRooms();
-      fetchJoinedRooms();
-      fetchSubscriptionStatus();
+    setSubscriptionLoading(true);
+    fetchSubscriptionStatus();
       fetchUserProfile();
     }
-  }, [authenticated, ownedRoomsPage, joinedRoomsPage]);
+  }, [authenticated, router]);
+
+  useEffect(() => {
+    if (authenticated) {
+      fetchOwnedRooms();
+      fetchJoinedRooms();
+    }
+  }, [authenticated, ownedRoomsPage, joinedRoomsPage, router]);
 
   const fetchOwnedRooms = async () => {
     setOwnedRoomsLoading(true);
@@ -109,7 +114,7 @@ export function Profile() {
     setProfileLoading(true);
     try {
       const response = await api.get(`/api/users/${email}`);
-      if (response.data.avatarURL) {
+      if (response.data.avatarURL && response.data.avatarURL !== avatarURL) {
         setAvatarUrl(response.data.avatarURL);
       }
     } catch (error) {
@@ -152,6 +157,7 @@ export function Profile() {
     try {
       await api.delete(`/api/rooms/${roomId}`);
       fetchOwnedRooms();
+      fetchJoinedRooms();
     } catch (error) {
       console.error("Error deleting room:", error);
     } finally {
@@ -186,7 +192,10 @@ export function Profile() {
         await api.put(`/api/users/${email}`, {
           avatarImageName: file.name,
         });
-        setAvatarUrl(URL.createObjectURL(file));
+        const newAvatarURL = URL.createObjectURL(file);
+        if (newAvatarURL !== avatarURL) {
+          setAvatarUrl(newAvatarURL);
+        }
       } catch (error) {
         console.error("Error updating avatar:", error);
       } finally {
@@ -212,7 +221,7 @@ export function Profile() {
                     ) : (
                       <>
                         <AvatarImage src={avatarURL} alt="User Avatar" />
-                        <AvatarFallback>{email.charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback><Icons.spinner className="h-16 w-16 animate-spin" /></AvatarFallback>
                       </>
                     )}
                   </Avatar>
@@ -353,7 +362,15 @@ export function Profile() {
             </div>
 
             <div className="bg-background rounded-lg p-6 shadow">
-              <div className="font-semibold mb-4">Joined Rooms</div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="font-semibold mb-4">Joined Rooms</div>
+                
+                  <Button variant="black" size="sm" onClick={handleCreateRoom} disabled={joinLoading}>
+                    {joinLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                    Join Room
+                  </Button>
+                
+              </div>
               {joinedRoomsLoading ? (
                 <div className="flex justify-center">
                   <Icons.spinner className="mr-2 h-6 w-6 animate-spin" />
@@ -448,7 +465,7 @@ export function Profile() {
                 {subscriptionLoading ? (
                   <Icons.spinner className="mr-2 h-6 w-6 animate-spin" />
                 ) : !subscription && (
-                  <Button variant="green">Subscribe</Button>
+                  <Button variant="green" onClick={()=> router.push("/pricing")}>Subscribe</Button>
                 )}
               </div>
               <div className="grid gap-2">

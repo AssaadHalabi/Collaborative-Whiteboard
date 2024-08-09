@@ -110,7 +110,7 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
             />
           </div>
 
-          {!isLogin && (
+          {/* {!isLogin && (
             <div className="grid gap-1">
               <Label className="sr-only" htmlFor="avatarUri">
                 Avatar URI
@@ -128,7 +128,7 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
                 className="px-3 py-2 border rounded-md"
               />
             </div>
-          )}
+          )} */}
 
           {error && (
             <div className="text-red-600 text-sm mt-2">

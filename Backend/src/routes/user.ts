@@ -210,6 +210,8 @@ router.get(
  *               $ref: '#/components/schemas/User'
  *       400:
  *         description: Invalid input
+ *       409:
+ *         description: User with email already exists
  */
 router.post(
   "/users",
@@ -220,11 +222,18 @@ router.post(
   validate,
   async (req: Request, res: Response) => {
     const { email, avatarUri = null, password } = req.body;
+    try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user: User = await prisma.user.create({
       data: { email, avatarUri, password: hashedPassword },
     });
     res.status(201).json({ email: user.email, avatarUri: user.avatarUri });
+    } catch (error:any) {
+      if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+        return res.status(409).json({ message: `User with email ${email} already exists` });
+      }
+      res.status(500).json({ error: "Internal server error" });
+    }
   },
 );
 
@@ -696,7 +705,7 @@ router.post(
       expiresIn: "1h",
     });
 
-    // Store the token in the database (optional)
+    // Store the token in the database
     await prisma.resetToken.create({
       data: {
         token,
@@ -705,7 +714,7 @@ router.post(
       },
     });
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetLink = `${process.env.FRONTEND_URL}/authentication/reset-password?token=${token}`;
 
     // Send email
     await sendEmail(user.email, "Password Reset", `Click here to reset your password: ${resetLink}`);

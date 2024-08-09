@@ -22,22 +22,29 @@ export const NavbarOuter = () => {
     try {
       const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
       if (refreshToken) {
-        await api.post('/api/logout', { token: refreshToken });
+        api.post('/api/logout', { token: refreshToken });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
         }
-        router.push('/authentication');
+        router.replace('/authentication');
+        // window?.replace('/authentication');
+        
       }
-      router.push('/authentication');
-    } catch (error:any) {
+      router.replace('/authentication');
+        // window?.replace('/authentication');
+      
+    } catch (error: any) {
       console.error('Error logging out:', error);
-      if(error.message ==="Token is required") router.push('/authentication');
+      router.replace('/authentication');
+        // window?.replace('/authentication');
+      
+      if (error.message === "Token is required") router.replace('/authentication');
     }
   };
 
   return (
-    <header className="bg-primary-black px-4 lg:px-6 h-14 flex items-center justify-between">
+    <header className="bg-primary-black px-4 lg:px-6 h-14 flex items-center justify-between sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2" prefetch={false}>
         <Image src="/assets/logos.svg" alt="Collaboard Logo" width={140} height={100} />
       </Link>
