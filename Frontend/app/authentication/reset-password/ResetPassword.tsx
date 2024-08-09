@@ -7,6 +7,7 @@ import { Input } from '@/components/authentication/input';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
 import { Icons } from '@/components/ui/icons';
+import NavbarOuter from '@/components/NavbarOuter';
 
 const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -37,6 +38,8 @@ const ResetPassword = () => {
   };
 
   return (
+    <>
+     <NavbarOuter />
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-md">
         <h2 className="text-2xl font-semibold text-center">Reset Password</h2>
@@ -64,6 +67,8 @@ const ResetPassword = () => {
         </form>
       </div>
     </div>
+    </>
+   
   );
 };
 
