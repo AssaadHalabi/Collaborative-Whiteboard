@@ -11,7 +11,14 @@ export const useAuth = (protect = false) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data, status } = await api.get('/api/check-auth');
+
+        if (localStorage.getItem('refreshToken') === null || localStorage.getItem('accessToken') === null) throw new Error("Tokens have been deleted",{cause:401})
+
+          const { data, status } = await api.get('/api/check-auth', {
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
+          });
         setAuthenticated(true);
         if (status === 200) setEmail(data.email)
       } catch (error: any) {
@@ -21,8 +28,8 @@ export const useAuth = (protect = false) => {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
           }
-          if(protect) router.push("/authentication")
         }
+      if (protect) router.replace("/authentication")
       } finally {
         setLoading(false);
       }
