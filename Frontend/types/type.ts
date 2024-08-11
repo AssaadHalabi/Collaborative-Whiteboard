@@ -104,10 +104,10 @@ export type NavbarProps = {
   imageInputRef: React.MutableRefObject<HTMLInputElement | null>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleActiveElement: (element: ActiveElement) => void;
-  roomId:string;
-  email:string;
-  userName:string;
-  avatarURL:string;
+  roomId: string;
+  email: string;
+  userName: string;
+  avatarURL: string;
 };
 
 export type ShapesMenuProps = {
@@ -184,7 +184,7 @@ export type RenderCanvas = {
 
 export type CursorChatProps = {
   cursor: { x: number; y: number };
-  email:string;
+  email: string;
   cursorState: CursorState;
   setCursorState: (cursorState: CursorState) => void;
   updateMyPresence: (

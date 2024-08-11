@@ -49,7 +49,9 @@ export function Profile() {
   const [joinedRoomsLoading, setJoinedRoomsLoading] = useState(true);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [avatarImage, setAvatarImage] = useState(null);
-  const [avatarURL, setAvatarUrl] = useState(`/assets/avatar-${Math.floor(Math.random() * 30)}.png`);
+  const [avatarURL, setAvatarUrl] = useState(
+    `/assets/avatar-${Math.floor(Math.random() * 30)}.png`
+  );
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -61,8 +63,8 @@ export function Profile() {
 
   useEffect(() => {
     if (authenticated) {
-    setSubscriptionLoading(true);
-    fetchSubscriptionStatus();
+      setSubscriptionLoading(true);
+      fetchSubscriptionStatus();
       fetchUserProfile();
     }
   }, [authenticated, router]);
@@ -138,7 +140,9 @@ export function Profile() {
     if (joinRoomUserName) {
       setJoinLoading(true);
       try {
-        await api.post(`/api/rooms/${joinRoomId}/join`, { userName: joinRoomUserName });
+        await api.post(`/api/rooms/${joinRoomId}/join`, {
+          userName: joinRoomUserName,
+        });
         fetchJoinedRooms();
         setIsJoinModalOpen(false);
         setErrorMessage("");
@@ -210,48 +214,52 @@ export function Profile() {
       {loading ? (
         <Loader />
       ) : (
-        <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8">
-            <div className="bg-background rounded-lg p-6 shadow">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-16 h-16">
+        <div className='mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8'>
+          <div className='grid gap-8'>
+            <div className='rounded-lg bg-background p-6 shadow'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-4'>
+                  <Avatar className='h-16 w-16'>
                     {profileLoading ? (
-                      <Icons.spinner className="h-16 w-16 animate-spin" />
+                      <Icons.spinner className='h-16 w-16 animate-spin' />
                     ) : (
                       <>
-                        <AvatarImage src={avatarURL} alt="User Avatar" />
-                        <AvatarFallback><Icons.spinner className="h-16 w-16 animate-spin" /></AvatarFallback>
+                        <AvatarImage src={avatarURL} alt='User Avatar' />
+                        <AvatarFallback>
+                          <Icons.spinner className='h-16 w-16 animate-spin' />
+                        </AvatarFallback>
                       </>
                     )}
                   </Avatar>
                   <div>
-                    <div className="font-semibold">{email}</div>
+                    <div className='font-semibold'>{email}</div>
                   </div>
                 </div>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-accent-foreground/10 hover:text-accent-foreground/80"
+                  variant='outline'
+                  size='sm'
+                  className='hover:bg-accent-foreground/10 hover:text-accent-foreground/80'
                   onClick={() => document.getElementById("avatarInput").click()}
                   disabled={uploadingAvatar}
                 >
-                  {uploadingAvatar && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                  {uploadingAvatar && (
+                    <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                  )}
                   Change Avatar
                 </Button>
                 <input
-                  id="avatarInput"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
+                  id='avatarInput'
+                  type='file'
+                  accept='image/*'
+                  className='hidden'
                   onChange={handleAvatarChange}
                 />
               </div>
               <div>
-                <p className="text-sm text-gray-600 mt-4">
+                <p className='mt-4 text-sm text-gray-600'>
                   <Link
-                    href="/authentication/forgot-password"
-                    className="underline underline-offset-4 text-blue-600 hover:text-blue-800"
+                    href='/authentication/forgot-password'
+                    className='text-blue-600 underline underline-offset-4 hover:text-blue-800'
                   >
                     Change Password
                   </Link>
@@ -259,55 +267,72 @@ export function Profile() {
               </div>
             </div>
 
-            <div className="bg-background rounded-lg p-6 shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className="font-semibold">Owned Rooms</div>
-                <Button variant="black" size="sm" onClick={handleCreateRoom} disabled={joinLoading}>
-                  {joinLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+            <div className='rounded-lg bg-background p-6 shadow'>
+              <div className='mb-4 flex items-center justify-between'>
+                <div className='font-semibold'>Owned Rooms</div>
+                <Button
+                  variant='black'
+                  size='sm'
+                  onClick={handleCreateRoom}
+                  disabled={joinLoading}
+                >
+                  {joinLoading && (
+                    <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                  )}
                   Create Room
                 </Button>
               </div>
               {ownedRoomsLoading ? (
-                <div className="flex justify-center">
-                  <Icons.spinner className="mr-2 h-6 w-6 animate-spin" />
+                <div className='flex justify-center'>
+                  <Icons.spinner className='mr-2 h-6 w-6 animate-spin' />
                 </div>
               ) : ownedRooms.length > 0 ? (
                 <>
-                  <div className="grid gap-4">
+                  <div className='grid gap-4'>
                     {paginate(ownedRooms, ownedRoomsPage).map((room) => {
                       const userRoom = room.users.find(
                         (userRoom) => userRoom.userEmail === email
                       );
                       return (
-                        <Card key={room.id} className="bg-muted p-4">
-                          <div className="flex items-center justify-between">
+                        <Card key={room.id} className='bg-muted p-4'>
+                          <div className='flex items-center justify-between'>
                             <div>
-                              <div className="font-semibold">Room ID: {room.id}</div>
-                              <div className="text-muted-foreground">{room.ownerEmail}</div>
+                              <div className='font-semibold'>
+                                Room ID: {room.id}
+                              </div>
+                              <div className='text-muted-foreground'>
+                                {room.ownerEmail}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <UsersIcon className="w-5 h-5" />
+                            <div className='flex items-center gap-2'>
+                              <UsersIcon className='h-5 w-5' />
                               <div>{room.users.length}</div>
                             </div>
                           </div>
-                          <div className="flex justify-end gap-2 mt-2">
+                          <div className='mt-2 flex justify-end gap-2'>
                             <Button
-                              variant="outline"
-                              size="sm"
-                              className="hover:bg-accent-foreground/10 hover:text-accent-foreground/80"
-                              onClick={() => handleJoinRoom(room.id, userRoom.userName)}
+                              variant='outline'
+                              size='sm'
+                              className='hover:bg-accent-foreground/10 hover:text-accent-foreground/80'
+                              onClick={() =>
+                                handleJoinRoom(room.id, userRoom.userName)
+                              }
                               disabled={joinLoading}
                             >
-                              {joinLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                              {joinLoading && (
+                                <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                              )}
                               Join
                             </Button>
                             <Button
-                              variant="destructive"
-                              size="sm"
+                              variant='destructive'
+                              size='sm'
                               onClick={() => handleDeleteRoom(room.id)}
                               disabled={deleteLoading === room.id}
                             >
-                              {deleteLoading === room.id && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                              {deleteLoading === room.id && (
+                                <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                              )}
                               Delete
                             </Button>
                           </div>
@@ -315,15 +340,17 @@ export function Profile() {
                       );
                     })}
                   </div>
-                  <div className="flex justify-center mt-6">
+                  <div className='mt-6 flex justify-center'>
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
-                            href="#"
+                            href='#'
                             onClick={(e) => {
                               e.preventDefault();
-                              setOwnedRoomsPage((prev) => Math.max(prev - 1, 1));
+                              setOwnedRoomsPage((prev) =>
+                                Math.max(prev - 1, 1)
+                              );
                             }}
                             isActive={ownedRoomsPage !== 1}
                           />
@@ -331,7 +358,7 @@ export function Profile() {
                         {Array.from({ length: totalOwnedPages }, (_, index) => (
                           <PaginationItem key={index}>
                             <PaginationLink
-                              href="#"
+                              href='#'
                               isActive={ownedRoomsPage === index + 1}
                               onClick={(e) => {
                                 e.preventDefault();
@@ -344,10 +371,12 @@ export function Profile() {
                         ))}
                         <PaginationItem>
                           <PaginationNext
-                            href="#"
+                            href='#'
                             onClick={(e) => {
                               e.preventDefault();
-                              setOwnedRoomsPage((prev) => Math.min(prev + 1, totalOwnedPages));
+                              setOwnedRoomsPage((prev) =>
+                                Math.min(prev + 1, totalOwnedPages)
+                              );
                             }}
                             isActive={ownedRoomsPage !== totalOwnedPages}
                           />
@@ -357,55 +386,71 @@ export function Profile() {
                   </div>
                 </>
               ) : (
-                <div className="text-center text-muted-foreground">No Rooms Owned</div>
+                <div className='text-center text-muted-foreground'>
+                  No Rooms Owned
+                </div>
               )}
             </div>
 
-            <div className="bg-background rounded-lg p-6 shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className="font-semibold mb-4">Joined Rooms</div>
-                
-                  <Button variant="black" size="sm" onClick={handleCreateRoom} disabled={joinLoading}>
-                    {joinLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                    Join Room
-                  </Button>
-                
+            <div className='rounded-lg bg-background p-6 shadow'>
+              <div className='mb-4 flex items-center justify-between'>
+                <div className='mb-4 font-semibold'>Joined Rooms</div>
+
+                <Button
+                  variant='black'
+                  size='sm'
+                  onClick={handleCreateRoom}
+                  disabled={joinLoading}
+                >
+                  {joinLoading && (
+                    <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                  )}
+                  Join Room
+                </Button>
               </div>
               {joinedRoomsLoading ? (
-                <div className="flex justify-center">
-                  <Icons.spinner className="mr-2 h-6 w-6 animate-spin" />
+                <div className='flex justify-center'>
+                  <Icons.spinner className='mr-2 h-6 w-6 animate-spin' />
                 </div>
               ) : joinedRooms.length > 0 ? (
                 <>
-                  <div className="grid gap-4">
+                  <div className='grid gap-4'>
                     {paginate(joinedRooms, joinedRoomsPage).map((room) => {
                       const userRoom = room.users.find(
                         (userRoom) => userRoom.userEmail === email
                       );
                       return (
-                        <Card key={room.id} className="bg-muted p-4">
-                          <div className="flex items-center justify-between">
+                        <Card key={room.id} className='bg-muted p-4'>
+                          <div className='flex items-center justify-between'>
                             <div>
-                              <div className="font-semibold">Room ID: {room.id}</div>
-                              <div className="text-muted-foreground">
-                                <span className="font-semibold">Owner:</span> {room.ownerEmail}
+                              <div className='font-semibold'>
+                                Room ID: {room.id}
                               </div>
-                              <div className="text-muted-foreground">
-                                <span className="font-semibold">Username:</span> {userRoom.userName}
+                              <div className='text-muted-foreground'>
+                                <span className='font-semibold'>Owner:</span>{" "}
+                                {room.ownerEmail}
+                              </div>
+                              <div className='text-muted-foreground'>
+                                <span className='font-semibold'>Username:</span>{" "}
+                                {userRoom.userName}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className='flex items-center gap-2'>
                               <Button
-                                variant="outline"
-                                size="sm"
-                                className="mr-4 hover:bg-accent-foreground/10 hover:text-accent-foreground/80"
-                                onClick={() => handleJoinRoom(room.id, userRoom.userName)}
+                                variant='outline'
+                                size='sm'
+                                className='mr-4 hover:bg-accent-foreground/10 hover:text-accent-foreground/80'
+                                onClick={() =>
+                                  handleJoinRoom(room.id, userRoom.userName)
+                                }
                                 disabled={joinLoading}
                               >
-                                {joinLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                                {joinLoading && (
+                                  <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                                )}
                                 Join
                               </Button>
-                              <UsersIcon className="w-5 h-5" />
+                              <UsersIcon className='h-5 w-5' />
                               <div>{room.users.length}</div>
                             </div>
                           </div>
@@ -413,39 +458,46 @@ export function Profile() {
                       );
                     })}
                   </div>
-                  <div className="flex justify-center mt-6">
+                  <div className='mt-6 flex justify-center'>
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
-                            href="#"
+                            href='#'
                             onClick={(e) => {
                               e.preventDefault();
-                              setJoinedRoomsPage((prev) => Math.max(prev - 1, 1));
+                              setJoinedRoomsPage((prev) =>
+                                Math.max(prev - 1, 1)
+                              );
                             }}
                             isActive={joinedRoomsPage !== 1}
                           />
                         </PaginationItem>
-                        {Array.from({ length: totalJoinedPages }, (_, index) => (
-                          <PaginationItem key={index}>
-                            <PaginationLink
-                              href="#"
-                              isActive={joinedRoomsPage === index + 1}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setJoinedRoomsPage(index + 1);
-                              }}
-                            >
-                              {index + 1}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
+                        {Array.from(
+                          { length: totalJoinedPages },
+                          (_, index) => (
+                            <PaginationItem key={index}>
+                              <PaginationLink
+                                href='#'
+                                isActive={joinedRoomsPage === index + 1}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setJoinedRoomsPage(index + 1);
+                                }}
+                              >
+                                {index + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          )
+                        )}
                         <PaginationItem>
                           <PaginationNext
-                            href="#"
+                            href='#'
                             onClick={(e) => {
                               e.preventDefault();
-                              setJoinedRoomsPage((prev) => Math.min(prev + 1, totalJoinedPages));
+                              setJoinedRoomsPage((prev) =>
+                                Math.min(prev + 1, totalJoinedPages)
+                              );
                             }}
                             isActive={joinedRoomsPage !== totalJoinedPages}
                           />
@@ -455,37 +507,50 @@ export function Profile() {
                   </div>
                 </>
               ) : (
-                <div className="text-center text-muted-foreground">No Joined Rooms</div>
+                <div className='text-center text-muted-foreground'>
+                  No Joined Rooms
+                </div>
               )}
             </div>
 
-            <div className="bg-background rounded-lg p-6 shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className="font-semibold">Subscription</div>
+            <div className='rounded-lg bg-background p-6 shadow'>
+              <div className='mb-4 flex items-center justify-between'>
+                <div className='font-semibold'>Subscription</div>
                 {subscriptionLoading ? (
-                  <Icons.spinner className="mr-2 h-6 w-6 animate-spin" />
-                ) : !subscription && (
-                  <Button variant="green" onClick={()=> router.push("/pricing")}>Subscribe</Button>
+                  <Icons.spinner className='mr-2 h-6 w-6 animate-spin' />
+                ) : (
+                  !subscription && (
+                    <Button
+                      variant='green'
+                      onClick={() => router.push("/pricing")}
+                    >
+                      Subscribe
+                    </Button>
+                  )
                 )}
               </div>
-              <div className="grid gap-2">
+              <div className='grid gap-2'>
                 {subscription ? (
                   <>
-                    <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Status:</div>
-                      <div className="font-semibold">{subscription.status}</div>
+                    <div className='flex items-center justify-between'>
+                      <div className='text-muted-foreground'>Status:</div>
+                      <div className='font-semibold'>{subscription.status}</div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Type:</div>
-                      <div className="font-semibold">{subscription.type}</div>
+                    <div className='flex items-center justify-between'>
+                      <div className='text-muted-foreground'>Type:</div>
+                      <div className='font-semibold'>{subscription.type}</div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-muted-foreground">Valid Until:</div>
-                      <div>{new Date(subscription.validUntil).toLocaleDateString()}</div>
+                    <div className='flex items-center justify-between'>
+                      <div className='text-muted-foreground'>Valid Until:</div>
+                      <div>
+                        {new Date(subscription.validUntil).toLocaleDateString()}
+                      </div>
                     </div>
                   </>
                 ) : (
-                  <div className="text-center text-muted-foreground">No active subscription</div>
+                  <div className='text-center text-muted-foreground'>
+                    No active subscription
+                  </div>
                 )}
               </div>
             </div>
@@ -494,27 +559,36 @@ export function Profile() {
           <Dialog open={isJoinModalOpen} onOpenChange={setIsJoinModalOpen}>
             <DialogContent>
               <DialogTitle>Join Room</DialogTitle>
-              <div className="mt-4">
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              <div className='mt-4'>
+                <label
+                  htmlFor='username'
+                  className='block text-sm font-medium text-gray-700'
+                >
                   Username
                 </label>
                 <input
-                  id="username"
-                  type="text"
+                  id='username'
+                  type='text'
                   value={joinRoomUserName}
                   onChange={(e) => setJoinRoomUserName(e.target.value)}
-                  className="mt-1 w-full px-4 py-2 border rounded-md"
+                  className='mt-1 w-full rounded-md border px-4 py-2'
                 />
               </div>
               {errorMessage && (
-                <div className="mt-2 text-sm text-red-600">{errorMessage}</div>
+                <div className='mt-2 text-sm text-red-600'>{errorMessage}</div>
               )}
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant='outline'>Cancel</Button>
                 </DialogClose>
-                <Button onClick={handleJoinRoomSubmit} variant="black" disabled={joinLoading}>
-                  {joinLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                <Button
+                  onClick={handleJoinRoomSubmit}
+                  variant='black'
+                  disabled={joinLoading}
+                >
+                  {joinLoading && (
+                    <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
+                  )}
                   Join
                 </Button>
               </DialogFooter>

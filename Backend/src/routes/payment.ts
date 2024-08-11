@@ -1,11 +1,15 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { createCheckoutSession } from '../services/stripeService';
-import Stripe from 'stripe';
+import express, { NextFunction, Request, Response } from "express";
+import { createCheckoutSession } from "../services/stripeService";
+import Stripe from "stripe";
 import jwt from "jsonwebtoken";
 import { body, param, validationResult } from "express-validator";
-import { convertUnixToDate } from '../utils/convertUnixToDate';
-import { isSubscriptionValid } from '../utils/isSubscriptionValid';
-import { PrismaClient, SubscriptionStatus, SubscriptionType } from '@prisma/client';
+import { convertUnixToDate } from "../utils/convertUnixToDate";
+import { isSubscriptionValid } from "../utils/isSubscriptionValid";
+import {
+  PrismaClient,
+  SubscriptionStatus,
+  SubscriptionType,
+} from "@prisma/client";
 
 const prisma = new PrismaClient({ log: ["query"] });
 
@@ -83,17 +87,24 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *       500:
  *         description: Server error
  */
-router.post('/create-checkout-session',
-  body("priceId").not().isEmpty().withMessage("stripe product priceId is required"),
-  authenticateToken, validate, async (req: Request, res: Response) => {
+router.post(
+  "/create-checkout-session",
+  body("priceId")
+    .not()
+    .isEmpty()
+    .withMessage("stripe product priceId is required"),
+  authenticateToken,
+  validate,
+  async (req: Request, res: Response) => {
     const user = (req as any).user;
-    try {  
+    try {
       const session = await createCheckoutSession(req.body.priceId, user.email);
       res.json({ sessionId: session.id });
     } catch (error) {
       res.status(500).json({ error: (error as Error).message });
     }
-  });
+  },
+);
 
 // router.post('/create-subscription', async (req: Request, res: Response) => {
 //     const { email, paymentMethodId, priceId } = req.body;
@@ -116,51 +127,62 @@ router.post('/create-checkout-session',
  *       400:
  *         description: Webhook error
  */
-router.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
-  const sig = req.headers['stripe-signature'];
+router.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req: Request, res: Response) => {
+    const sig = req.headers["stripe-signature"];
 
-  let event: Stripe.Event;
-  try {
-      event = stripe.webhooks.constructEvent(req.body, sig as string, process.env.STRIPE_WEBHOOK_SECRET || '');
-  } catch (err) {
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig as string,
+        process.env.STRIPE_WEBHOOK_SECRET || "",
+      );
+    } catch (err) {
       console.log((err as Error).message);
       return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
-  }
+    }
 
-  const session = event.data.object as Stripe.Checkout.Session;
-  console.log(event.data.object);
-  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    console.log(event.data.object);
+    if (event.type === "checkout.session.completed") {
       try {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-          console.log("hooooray webhooks");
-          console.log(subscription.id);
-          console.log(JSON.stringify(subscription, null, 2));
+        const subscription = await stripe.subscriptions.retrieve(
+          session.subscription as string,
+        );
+        console.log("hooooray webhooks");
+        console.log(subscription.id);
+        console.log(JSON.stringify(subscription, null, 2));
 
-          await prisma.subscription.upsert({
-              where: {
-                  stripeId: subscription.id,
-              },
-              update: {
-                  type: 'PREMIUM',
-                  status: 'ACTIVE',
-                  user: { connect: { email: session.customer_email! } },
-              },
-              create: {
-                  type: 'PREMIUM',
-                  status: 'ACTIVE',
-                  stripeId: subscription.id,
-                  user: { connect: { email: session.customer_email! } },
-              },
-          });
+        await prisma.subscription.upsert({
+          where: {
+            stripeId: subscription.id,
+          },
+          update: {
+            type: "PREMIUM",
+            status: "ACTIVE",
+            user: { connect: { email: session.customer_email! } },
+          },
+          create: {
+            type: "PREMIUM",
+            status: "ACTIVE",
+            stripeId: subscription.id,
+            user: { connect: { email: session.customer_email! } },
+          },
+        });
 
-          res.status(200).send(subscription);
+        res.status(200).send(subscription);
       } catch (error) {
-          res.status(500).send(`Failed to save subscription: ${(error as Error).message}`);
+        res
+          .status(500)
+          .send(`Failed to save subscription: ${(error as Error).message}`);
       }
-  } else {
-      res.status(200).send('Unhandled event type');
-  }
-});
-
+    } else {
+      res.status(200).send("Unhandled event type");
+    }
+  },
+);
 
 export default router;

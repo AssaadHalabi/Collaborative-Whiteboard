@@ -246,19 +246,19 @@ router.get(
     const user = (req as any).user;
     console.log("user");
     console.log(user);
-    
+
     try {
       const rooms = await prisma.room.findMany({
         where: {
           users: {
             some: {
-              userEmail: user.email
-            }
-          }
+              userEmail: user.email,
+            },
+          },
         },
         include: {
-          users: true
-        }
+          users: true,
+        },
       });
 
       res.json(rooms);
@@ -305,7 +305,7 @@ router.get(
       const userRooms: UserRoom[] | null = await prisma.userRoom.findMany({
         where: { roomId: id },
       });
-      
+
       // const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}/active_users`, {
       //   method: "GET",
       //   headers: {
@@ -314,7 +314,7 @@ router.get(
       //   }
       // });
       // console.log(await response.text());
-      
+
       if (!room) {
         return res.status(404).json({ message: `Room ID ${id} not found` });
       }
@@ -373,7 +373,9 @@ router.post(
       }
 
       const hasActiveSubscription =
-        userData.subscription && userData.subscription.type === "PREMIUM" && userData.subscription.status === "ACTIVE";
+        userData.subscription &&
+        userData.subscription.type === "PREMIUM" &&
+        userData.subscription.status === "ACTIVE";
 
       const ownedRoomsCount = await prisma.room.count({
         where: { ownerEmail: user.email },
@@ -410,7 +412,6 @@ router.post(
     }
   },
 );
-
 
 /**
  * @swagger
@@ -466,14 +467,14 @@ router.post(
       const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}`, {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
-          'Content-Type': 'application/json',
-        }
+          Authorization: `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
+          "Content-Type": "application/json",
+        },
       });
-      
+
       if (!room || !response.ok) {
-        console.log(room && `DB room found ${id}`)
-        console.log(response.ok && `Liveblocks room found ${id}`)
+        console.log(room && `DB room found ${id}`);
+        console.log(response.ok && `Liveblocks room found ${id}`);
         return res.status(404).json({ message: "Room not found" });
       }
 
@@ -500,7 +501,6 @@ router.post(
     }
   },
 );
-
 
 // /**
 //  * @swagger
@@ -589,10 +589,10 @@ router.delete(
     try {
       // Try deleting the room from Liveblocks
       const response = await fetch(`https://api.liveblocks.io/v2/rooms/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.LIVEBLOCKS_SECRET_KEY!}`,
+          "Content-Type": "application/json",
         },
       });
 
@@ -611,7 +611,9 @@ router.delete(
       }
 
       if (room.ownerEmail !== user.email) {
-        return res.status(403).json({ message: "Forbidden, user is not the owner of the room" });
+        return res
+          .status(403)
+          .json({ message: "Forbidden, user is not the owner of the room" });
       }
 
       // Delete related UserRoom entities
@@ -628,7 +630,9 @@ router.delete(
       if (!res.headersSent) {
         if (error instanceof Error) {
           console.error(error);
-          res.status(500).json({ message: `Internal server error: ${error.message}` });
+          res
+            .status(500)
+            .json({ message: `Internal server error: ${error.message}` });
         } else {
           res.status(500).json({ message: "Internal server error" });
         }

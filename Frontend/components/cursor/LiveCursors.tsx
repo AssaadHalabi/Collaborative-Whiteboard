@@ -8,7 +8,7 @@ const LiveCursors = ({ others }: LiveCursorProps) => {
     if (presence == null || !presence?.cursor) {
       return null;
     }
-    
+
     return (
       <Cursor
         key={connectionId}

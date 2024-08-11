@@ -3,7 +3,13 @@
 import { fabric } from "fabric";
 import { useEffect, useRef, useState } from "react";
 
-import { useMutation, useMyPresence, useRedo, useStorage, useUndo } from "@/liveblocks.config";
+import {
+  useMutation,
+  useMyPresence,
+  useRedo,
+  useStorage,
+  useUndo,
+} from "@/liveblocks.config";
 import {
   handleCanvaseMouseMove,
   handleCanvasMouseDown,
@@ -24,10 +30,20 @@ import { handleImageUpload } from "@/lib/shapes";
 import { defaultNavElement } from "@/constants";
 import { ActiveElement, Attributes } from "@/types/type";
 
-const Board = ({ email, roomId, userName, avatarURL }: { email: string; roomId: string; userName: string; avatarURL: string }) => {
+const Board = ({
+  email,
+  roomId,
+  userName,
+  avatarURL,
+}: {
+  email: string;
+  roomId: string;
+  userName: string;
+  avatarURL: string;
+}) => {
   // console.log(userName);
   // console.log(avatarURL);
-  
+
   /**
    * useUndo and useRedo are hooks provided by Liveblocks that allow you to
    * undo and redo mutations.
@@ -491,8 +507,6 @@ const Board = ({ email, roomId, userName, avatarURL }: { email: string; roomId: 
     });
   }, [canvasObjects]);
 
-
-
   return (
     <main className='h-screen overflow-hidden bg-primary-grey-200'>
       <Navbar
@@ -519,7 +533,14 @@ const Board = ({ email, roomId, userName, avatarURL }: { email: string; roomId: 
       <section className='flex h-full flex-row'>
         <LeftSidebar allShapes={Array.from(canvasObjects)} />
 
-        <Live canvasRef={canvasRef} undo={undo} redo={redo} email={email} roomId={roomId} userName={userName} />
+        <Live
+          canvasRef={canvasRef}
+          undo={undo}
+          redo={redo}
+          email={email}
+          roomId={roomId}
+          userName={userName}
+        />
 
         <RightSidebar
           elementAttributes={elementAttributes}

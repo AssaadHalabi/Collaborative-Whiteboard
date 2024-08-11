@@ -69,7 +69,6 @@ export const handleCanvasMouseDown = ({
 
   canvas.isDrawingMode = false;
 
-
   // if target is the selected shape or active selection, set isDrawing to false
   if (
     target &&
@@ -80,7 +79,6 @@ export const handleCanvasMouseDown = ({
 
     // set active object to target
     canvas.setActiveObject(target);
-    
 
     /**
      * setCoords() is used to update the controls of the object
@@ -340,7 +338,6 @@ export const handleCanvasSelectionCreated = ({
   }
 };
 
-
 // update element attributes when element is scaled
 export const handleCanvasObjectScaling = ({
   options,
@@ -351,7 +348,7 @@ export const handleCanvasObjectScaling = ({
   if (target?.type === "activeSelection") {
     const activeSelection = target as fabric.ActiveSelection;
     console.log(activeSelection);
-    
+
     activeSelection.getObjects().forEach((object) => {
       const scaledWidth = object?.scaleX
         ? object?.width! * object?.scaleX
@@ -381,7 +378,6 @@ export const handleCanvasObjectScaling = ({
     }));
   }
 };
-
 
 // render canvas objects coming from storage on canvas
 export const renderCanvas = ({
@@ -443,18 +439,18 @@ export const handleResize = ({ canvas }: { canvas: fabric.Canvas | null }) => {
   const newWidth = Math.max(canvasElement.clientWidth, minWidth);
   const newHeight = Math.max(canvasElement.clientHeight, minHeight);
 
-try {
-  canvas.setDimensions({
-    width: newWidth,
-    height: newHeight,
-  });
-  // Adjust the viewport of the canvas to the new dimensions
-  canvas.calcOffset();
-  canvas.renderAll();
-} catch (error:any) {
-  console.log(canvas);
-  return
-}
+  try {
+    canvas.setDimensions({
+      width: newWidth,
+      height: newHeight,
+    });
+    // Adjust the viewport of the canvas to the new dimensions
+    canvas.calcOffset();
+    canvas.renderAll();
+  } catch (error: any) {
+    console.log(canvas);
+    return;
+  }
 };
 
 // zoom canvas on mouse scroll

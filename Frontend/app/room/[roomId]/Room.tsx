@@ -6,7 +6,19 @@ import { ClientSideSuspense } from "@liveblocks/react";
 import Loader from "@/components/Loader";
 import { RoomProvider } from "@/liveblocks.config";
 
-const Room = ({ children, roomId, email, userName, avatarURL  }: { children: React.ReactNode, roomId: string; email: string; userName: string; avatarURL: string; }) => {
+const Room = ({
+  children,
+  roomId,
+  email,
+  userName,
+  avatarURL,
+}: {
+  children: React.ReactNode;
+  roomId: string;
+  email: string;
+  userName: string;
+  avatarURL: string;
+}) => {
   return (
     <RoomProvider
       id={roomId}
@@ -16,7 +28,14 @@ const Room = ({ children, roomId, email, userName, avatarURL  }: { children: Rea
        *
        * initialPresence: https://liveblocks.io/docs/api-reference/liveblocks-react#RoomProvider
        */
-      initialPresence={{ cursor: null, cursorColor: null, editingText: null, email, userName, avatarURL }}
+      initialPresence={{
+        cursor: null,
+        cursorColor: null,
+        editingText: null,
+        email,
+        userName,
+        avatarURL,
+      }}
       /**
        * initialStorage is used to initialize the storage of the room.
        *
@@ -36,6 +55,6 @@ const Room = ({ children, roomId, email, userName, avatarURL  }: { children: Rea
       </ClientSideSuspense>
     </RoomProvider>
   );
-}
+};
 
 export default Room;

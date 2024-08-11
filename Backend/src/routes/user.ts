@@ -5,8 +5,13 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { UserDto } from "../../types/User";
 import { sendEmail } from "../services/emailSerice";
-import { S3Client, GetObjectCommand, PutObjectCommand, S3ClientResolvedConfigType } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3ClientResolvedConfigType,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { parseS3Uri } from "../utils/parseS3Uri";
 import { createS3Uri } from "../utils/createS3Uri";
 
@@ -14,12 +19,13 @@ const prisma = new PrismaClient({ log: ["query"] });
 
 const router = Router();
 const clientParams: any = {
-  region: process.env.AWS_REGION!
-}
-if(process.env.NODE_ENV !== "PRODUCTION") clientParams.credentials = {
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-}
+  region: process.env.AWS_REGION!,
+};
+if (process.env.NODE_ENV !== "PRODUCTION")
+  clientParams.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  };
 const s3Client = new S3Client(clientParams);
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "youraccesstokensecret";
@@ -70,7 +76,6 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *         - password
  */
 
-
 /**
  * @swagger
  * components:
@@ -96,7 +101,6 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
  *       required:
  *         - avatarImageName
  */
-
 
 /**
  * @swagger
@@ -171,19 +175,23 @@ router.get(
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      let avatarURL = null
-      if(user.avatarUri ){
-        const command = new GetObjectCommand(parseS3Uri(user.avatarUri)
-        );
+      let avatarURL = null;
+      if (user.avatarUri) {
+        const command = new GetObjectCommand(parseS3Uri(user.avatarUri));
 
-      avatarURL = await getSignedUrl(s3Client, command, { expiresIn: 604800 });}
+        avatarURL = await getSignedUrl(s3Client, command, {
+          expiresIn: 604800,
+        });
+      }
 
       res.json({
         ...user,
         avatarURL,
       });
     } catch (error) {
-      res.status(500).json({ message: "An error occurred while retrieving the user" });
+      res
+        .status(500)
+        .json({ message: "An error occurred while retrieving the user" });
     }
   },
 );
@@ -224,14 +232,16 @@ router.post(
   async (req: Request, res: Response) => {
     const { email, avatarUri = null, password } = req.body;
     try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user: User = await prisma.user.create({
-      data: { email, avatarUri, password: hashedPassword },
-    });
-    res.status(201).json({ email: user.email, avatarUri: user.avatarUri });
-    } catch (error:any) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user: User = await prisma.user.create({
+        data: { email, avatarUri, password: hashedPassword },
+      });
+      res.status(201).json({ email: user.email, avatarUri: user.avatarUri });
+    } catch (error: any) {
       if (error.code === "P2002" && error.meta?.target?.includes("email")) {
-        return res.status(409).json({ message: `User with email ${email} already exists` });
+        return res
+          .status(409)
+          .json({ message: `User with email ${email} already exists` });
       }
       res.status(500).json({ error: "Internal server error" });
     }
@@ -278,9 +288,15 @@ router.post(
  *         description: Server error
  */
 router.post(
-  '/generate-upload-url',
-  body('avatarImageName').not().isEmpty().withMessage('avatarImageName is required'),
-  body('avatarImageType').not().isEmpty().withMessage('avatarImageType is required'),
+  "/generate-upload-url",
+  body("avatarImageName")
+    .not()
+    .isEmpty()
+    .withMessage("avatarImageName is required"),
+  body("avatarImageType")
+    .not()
+    .isEmpty()
+    .withMessage("avatarImageType is required"),
   validate,
   authenticateToken,
   async (req: Request, res: Response) => {
@@ -296,13 +312,17 @@ router.post(
       const command = new PutObjectCommand(params);
       const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 
-      console.log('[INFO_POST_AVATAR_IMAGE_UPLOAD_PRESIGNED_URL] AOA FEATURE UPLOAD URL created successfully');
+      console.log(
+        "[INFO_POST_AVATAR_IMAGE_UPLOAD_PRESIGNED_URL] AOA FEATURE UPLOAD URL created successfully",
+      );
       return res.status(200).json({ url });
     } catch (error: any) {
-      console.error(`[ERROR_POST_AVATAR_IMAGE_UPLOAD_PRESIGNED_URL] ${error.message}`);
-      return res.status(500).json({message: error.message});
+      console.error(
+        `[ERROR_POST_AVATAR_IMAGE_UPLOAD_PRESIGNED_URL] ${error.message}`,
+      );
+      return res.status(500).json({ message: error.message });
     }
-  }
+  },
 );
 
 /**
@@ -339,7 +359,10 @@ router.post(
 router.put(
   "/users/:email",
   param("email").isEmail().withMessage("Invalid email format"),
-  body("avatarImageName").not().isEmpty().withMessage("avatarImageName is required"),
+  body("avatarImageName")
+    .not()
+    .isEmpty()
+    .withMessage("avatarImageName is required"),
   validate,
   authenticateToken,
   async (req: Request, res: Response) => {
@@ -365,11 +388,12 @@ router.put(
       });
       res.json({ email: user.email, avatarUri: user.avatarUri });
     } catch (error) {
-      res.status(500).json({ message: "An error occurred while updating the user" });
+      res
+        .status(500)
+        .json({ message: "An error occurred while updating the user" });
     }
   },
 );
-
 
 /**
  * @swagger
@@ -529,7 +553,6 @@ router.post("/logout", async (req: Request, res: Response) => {
  *         description: Invalid or expired refresh token
  */
 router.post("/refresh", async (req: Request, res: Response) => {
-  
   const { token } = req.body;
   if (!token) return res.status(400).json({ message: "Token is required" });
 
@@ -660,7 +683,7 @@ router.get("/check-auth", authenticateToken, (req: Request, res: Response) => {
  * /forgot-password:
  *   post:
  *     summary: Request a password reset
- *     tags: 
+ *     tags:
  *       - Authentication
  *     requestBody:
  *       required: true
@@ -718,7 +741,11 @@ router.post(
     const resetLink = `${process.env.FRONTEND_URL}/authentication/reset-password?token=${token}`;
 
     // Send email
-    await sendEmail(user.email, "Password Reset", `Click here to reset your password: ${resetLink}`);
+    await sendEmail(
+      user.email,
+      "Password Reset",
+      `Click here to reset your password: ${resetLink}`,
+    );
 
     res.json({ message: "Password reset email sent" });
   },
@@ -794,14 +821,18 @@ router.post(
 router.post(
   "/reset-password",
   body("token").not().isEmpty().withMessage("Token is required"),
-  body("newPassword").isLength({ min: 6 }).withMessage("New password must be at least 6 characters long"),
+  body("newPassword")
+    .isLength({ min: 6 })
+    .withMessage("New password must be at least 6 characters long"),
   validate,
   async (req: Request, res: Response) => {
     const { token, newPassword } = req.body;
 
     let email: string;
     try {
-      const payload = jwt.verify(token, ACCESS_TOKEN_SECRET) as { email: string };
+      const payload = jwt.verify(token, ACCESS_TOKEN_SECRET) as {
+        email: string;
+      };
       email = payload.email;
     } catch (err) {
       return res.status(400).json({ message: "Invalid or expired token" });
@@ -822,7 +853,5 @@ router.post(
     res.json({ message: "Password reset successful" });
   },
 );
-
-
 
 export default router;
