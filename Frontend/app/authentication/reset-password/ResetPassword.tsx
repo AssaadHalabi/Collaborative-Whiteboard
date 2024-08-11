@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/authentication/input";
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/axios";
 import { Icons } from "@/components/ui/icons";
 import NavbarOuter from "@/components/NavbarOuter";
+import Loader from "@/components/Loader";
 
-const ResetPassword = () => {
+const ResetPasswordForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -79,5 +80,11 @@ const ResetPassword = () => {
     </>
   );
 };
-
+const ResetPassword = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+};
 export default ResetPassword;
