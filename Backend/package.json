@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "collaboard-backend",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -8,7 +8,8 @@
     "dbgen": "npx prisma db push && npx prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prettier": "npx prettier . --write",
-    "build": "tsc"
+    "build": "prisma generate && tsc",
+    "deploy": "serverless deploy"
   },
   "keywords": [],
   "author": "",
@@ -25,15 +26,23 @@
     "@types/stripe": "^8.0.417",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
-    "prisma": "^5.17.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "prisma": "^5.18.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-plugin-typescript": "^2.1.5",
+    "serverless-prisma": "^0.0.1",
+    "serverless-webpack": "^5.14.1",
+    "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "webpack": "^5.93.0",
+    "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.623.0",
     "@aws-sdk/s3-request-presigner": "^3.623.0",
-    "@prisma/client": "^5.17.0",
+    "@prisma/client": "^5.18.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
@@ -41,6 +50,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.14",
     "nodemon": "^3.1.4",
+    "serverless-http": "^3.2.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "stripe": "^16.5.0",

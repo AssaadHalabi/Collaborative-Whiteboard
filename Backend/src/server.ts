@@ -8,6 +8,7 @@ import userRoutes from "./routes/user";
 import roomRoutes from "./routes/room";
 import subscriptionRoutes from "./routes/subscription";
 import paymentRoutes from './routes/payment';
+import serverless from "serverless-http";
 
 const prisma = new PrismaClient({ log: ["query"] });
 const app = express();
@@ -59,3 +60,5 @@ app.use("/api", paymentRoutes);
 
 const port = process.env.PORT || 4000;
 server.listen(port, () => console.log(`Listening on port ${port}`));
+
+export const handler = serverless(app);

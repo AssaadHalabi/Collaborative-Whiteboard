@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { UserDto } from "../../types/User";
 import { sendEmail } from "../services/emailSerice";
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, PutObjectCommand, S3ClientResolvedConfigType } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { parseS3Uri } from "../utils/parseS3Uri";
 import { createS3Uri } from "../utils/createS3Uri";
@@ -13,13 +13,14 @@ import { createS3Uri } from "../utils/createS3Uri";
 const prisma = new PrismaClient({ log: ["query"] });
 
 const router = Router();
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+const clientParams: any = {
+  region: process.env.AWS_REGION!
+}
+if(process.env.NODE_ENV !== "PRODUCTION") clientParams.credentials = {
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+}
+const s3Client = new S3Client(clientParams);
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || "youraccesstokensecret";
 const REFRESH_TOKEN_SECRET =

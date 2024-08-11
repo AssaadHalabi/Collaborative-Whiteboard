@@ -6,4 +6,5 @@ zips
 .env
 key.txt
 key-public.txt
+.serverless
 
