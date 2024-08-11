@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import StripeProvider from '@/components/StripeProvider';
-import Pricing from '@/components/pricing/pricing';
+import StripeProvider from "@/components/StripeProvider";
+import Pricing from "@/components/pricing/pricing";
 
 const PricingPage = () => {
   return (
@@ -9,6 +9,6 @@ const PricingPage = () => {
       <Pricing />
     </StripeProvider>
   );
-}
+};
 
 export default PricingPage;

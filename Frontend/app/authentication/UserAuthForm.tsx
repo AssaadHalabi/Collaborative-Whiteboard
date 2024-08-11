@@ -16,7 +16,11 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
   isLogin: boolean;
 }
 
-export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps) {
+export function UserAuthForm({
+  className,
+  isLogin,
+  ...props
+}: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -52,7 +56,11 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
   }
 
   async function handleSignUp() {
-    const signUpResponse = await api.post("/api/users", { email, password, avatarUri });
+    const signUpResponse = await api.post("/api/users", {
+      email,
+      password,
+      avatarUri,
+    });
     if (signUpResponse.status === 201) {
       await handleLogin();
     }
@@ -61,7 +69,10 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
   function handleError(err: any) {
     if (axios.isAxiosError(err)) {
       const { data } = err.response || {};
-      const errorMessage = data?.errors?.map((error: any) => error.msg).join(", ") || data?.message || err.message;
+      const errorMessage =
+        data?.errors?.map((error: any) => error.msg).join(", ") ||
+        data?.message ||
+        err.message;
       setError(errorMessage);
     } else {
       setError("An unexpected error occurred");
@@ -71,41 +82,41 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
   return (
     <div className={cn("grid gap-6", className)} {...props}>
       <form onSubmit={onSubmit}>
-        <div className="grid gap-4">
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="email">
+        <div className='grid gap-4'>
+          <div className='grid gap-1'>
+            <Label className='sr-only' htmlFor='email'>
               Email
             </Label>
             <Input
-              id="email"
-              placeholder="name@example.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
+              id='email'
+              placeholder='name@example.com'
+              type='email'
+              autoCapitalize='none'
+              autoComplete='email'
+              autoCorrect='off'
               disabled={isLoading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="px-3 py-2 border rounded-md"
+              className='rounded-md border px-3 py-2'
               required
             />
           </div>
 
-          <div className="grid gap-1">
-            <Label className="sr-only" htmlFor="password">
+          <div className='grid gap-1'>
+            <Label className='sr-only' htmlFor='password'>
               Password
             </Label>
             <Input
-              id="password"
-              placeholder="Your password"
-              type="password"
-              autoCapitalize="none"
-              autoComplete="current-password"
-              autoCorrect="off"
+              id='password'
+              placeholder='Your password'
+              type='password'
+              autoCapitalize='none'
+              autoComplete='current-password'
+              autoCorrect='off'
               disabled={isLoading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="px-3 py-2 border rounded-md"
+              className='rounded-md border px-3 py-2'
               required
             />
           </div>
@@ -130,26 +141,22 @@ export function UserAuthForm({ className, isLogin, ...props }: UserAuthFormProps
             </div>
           )} */}
 
-          {error && (
-            <div className="text-red-600 text-sm mt-2">
-              {error}
-            </div>
-          )}
+          {error && <div className='mt-2 text-sm text-red-600'>{error}</div>}
 
-          <Button 
-            className="w-full py-2 bg-black text-white rounded-md hover:bg-accent-foreground/90"
+          <Button
+            className='w-full rounded-md bg-black py-2 text-white hover:bg-accent-foreground/90'
             disabled={isLoading}
           >
             {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              <Icons.spinner className='mr-2 h-4 w-4 animate-spin' />
             )}
             {isLogin ? "Sign In" : "Sign Up"} with Email
           </Button>
         </div>
       </form>
-      <div className="relative my-2">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
+      <div className='relative my-2'>
+        <div className='absolute inset-0 flex items-center'>
+          <span className='w-full border-t' />
         </div>
       </div>
     </div>

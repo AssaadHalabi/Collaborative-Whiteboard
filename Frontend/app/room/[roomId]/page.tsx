@@ -7,8 +7,8 @@ import useAuth from "@/hooks/useAuth";
 import api from "@/lib/axios";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 /**
  * Disable SSR to avoid pre-rendering issues of Next.js
@@ -16,18 +16,23 @@ import Image from 'next/image';
  */
 const Board = dynamic(() => import("./Board"), {
   ssr: false,
-  loading: () => <Loader />
+  loading: () => <Loader />,
 });
 
 const RoomPage = () => {
-  const params = useParams<{ roomId: string; }>();
+  const params = useParams<{ roomId: string }>();
   const { roomId } = params;
-  if (Array.isArray(roomId)) throw new Error(`roomId should be a string not an array /room/[roomId] \n provided value: ${JSON.stringify(roomId, null, 2)}`);
-  
+  if (Array.isArray(roomId))
+    throw new Error(
+      `roomId should be a string not an array /room/[roomId] \n provided value: ${JSON.stringify(roomId, null, 2)}`
+    );
+
   const { loading: authLoading, authenticated, email } = useAuth();
   const [userName, setUserName] = useState<string>("");
   // const [avatarURL, setAvatarUrl] = useState<string>("/placeholder-user.jpg");
-  const [avatarURL, setAvatarUrl] = useState<string>(`/assets/avatar-${Math.floor(Math.random() * 30)}.png`);
+  const [avatarURL, setAvatarUrl] = useState<string>(
+    `/assets/avatar-${Math.floor(Math.random() * 30)}.png`
+  );
   const [fetchingRoomData, setFetchingRoomData] = useState<boolean>(true);
   const [fetchingUserProfile, setFetchingUserProfile] = useState<boolean>(true);
   const router = useRouter();
@@ -35,12 +40,18 @@ const RoomPage = () => {
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
-        const { data: userRooms, status, statusText } = await api.get(`/api/rooms/${roomId}/users`);
+        const {
+          data: userRooms,
+          status,
+          statusText,
+        } = await api.get(`/api/rooms/${roomId}/users`);
         if (status !== 200) {
           throw new Error(`Error: ${userRooms.error} ${statusText}`);
         }
 
-        const user = userRooms.find((userRoom: any) => userRoom.userEmail === email);
+        const user = userRooms.find(
+          (userRoom: any) => userRoom.userEmail === email
+        );
         if (user) {
           setUserName(user.userName);
         } else {
@@ -90,12 +101,22 @@ const RoomPage = () => {
   }
 
   return (
-    <Room roomId={roomId} email={email} userName={userName} avatarURL={avatarURL}>
+    <Room
+      roomId={roomId}
+      email={email}
+      userName={userName}
+      avatarURL={avatarURL}
+    >
       <TooltipProvider>
-        <Board email={email} roomId={roomId} userName={userName} avatarURL={avatarURL} />
+        <Board
+          email={email}
+          roomId={roomId}
+          userName={userName}
+          avatarURL={avatarURL}
+        />
       </TooltipProvider>
     </Room>
   );
-}
+};
 
 export default RoomPage;

@@ -32,10 +32,15 @@
     @apply border-border;
   }
   body {
-    @apply bg-lobby-background text-foreground font-body;
+    @apply bg-lobby-background font-body text-foreground;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading;
   }
 }

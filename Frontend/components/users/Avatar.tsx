@@ -12,16 +12,14 @@ const Avatar = ({ name, avatarURL, otherStyles }: Props) => (
   <>
     <Tooltip>
       <TooltipTrigger>
-        <div className={`relative h-9 w-9 rounded-full ${otherStyles}`} data-tooltip={name}>
-          <Image
-            src={avatarURL}
-            fill
-            className="rounded-full"
-            alt={name}
-          />
+        <div
+          className={`relative h-9 w-9 rounded-full ${otherStyles}`}
+          data-tooltip={name}
+        >
+          <Image src={avatarURL} fill className='rounded-full' alt={name} />
         </div>
       </TooltipTrigger>
-      <TooltipContent className="border-none bg-primary-grey-200 px-2.5 py-1.5 text-xs">
+      <TooltipContent className='border-none bg-primary-grey-200 px-2.5 py-1.5 text-xs'>
         {name}
       </TooltipContent>
     </Tooltip>
