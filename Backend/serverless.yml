@@ -1,0 +1,53 @@
+org: collaboard
+app: collaboard-backend
+service: backend
+
+frameworkVersion: '4'
+useDotenv: true
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: eu-north-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+        - "s3:PutObject"
+      Resource:
+        - "arn:aws:s3:::collaboard-avatars/*"
+  stage: ${opt:stage, 'dev'}
+  environment:
+    DATABASE_URL: postgres://${env:AWS_DB_MASTER_USERNAME}:${env:AWS_DB_MASTER_PASSWORD}@${cf:rds-service-${self:provider.stage}.RDSInstanceEndpoint}:${cf:rds-service-${self:provider.stage}.RDSInstancePort}/${env:AWS_DB_NAME}
+    ACCESS_TOKEN_SECRET: ${env:ACCESS_TOKEN_SECRET}
+    REFRESH_TOKEN_SECRET: ${env:REFRESH_TOKEN_SECRET}
+    GMAIL_USER: ${env:GMAIL_USER}
+    GMAIL_APP_PASSWORD: ${env:GMAIL_APP_PASSWORD}
+    FRONTEND_URL: ${env:FRONTEND_URL}
+    STRIPE_TEST_SECRET_KEY: ${env:STRIPE_TEST_SECRET_KEY}
+    STRIPE_WEBHOOK_SECRET: ${env:STRIPE_WEBHOOK_SECRET}
+    LIVEBLOCKS_PUBLIC_KEY: ${env:LIVEBLOCKS_PUBLIC_KEY}
+    LIVEBLOCKS_SECRET_KEY: ${env:LIVEBLOCKS_SECRET_KEY}
+    AWS_S3_BUCKET_NAME: ${env:AWS_S3_BUCKET_NAME}
+
+functions:
+  app:
+    handler: src/server.handler
+    timeout: 30
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+package:
+  individually: true
+  excludeDevDependencies: true
+  patterns:
+    - '!node_modules/.prisma/client/libquery_engine-*'
+    - 'node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node'
+    - '!node_modules/prisma/libquery_engine-*'
+    - '!node_modules/@prisma/engines/**'
+    - '!node_modules/.cache/prisma/**'
+
+plugins:
+  - serverless-dotenv-plugin
