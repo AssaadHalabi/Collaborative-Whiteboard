@@ -11,8 +11,8 @@ export function ComingSoon() {
             Coming Soon
           </h1>
           <p className='mt-6 text-lg leading-8 text-secondary-foreground'>
-            We're working hard to bring you something amazing. Stay tuned for
-            updates!
+            We&apos;re working hard to bring you something amazing. Stay tuned
+            for updates!
           </p>
           <div className='mt-10 flex items-center justify-center gap-x-6'>
             <div />
