@@ -29,7 +29,7 @@ resources:
         MasterUsername: ${env:AWS_DB_MASTER_USERNAME}
         MasterUserPassword: ${env:AWS_DB_MASTER_PASSWORD}
         VPCSecurityGroups:
-          - { "Fn::GetAtt": [ "MyRDSInstanceSecurityGroup", "GroupId" ] }
+          - { "Fn::GetAtt": ["MyRDSInstanceSecurityGroup", "GroupId"] }
         MultiAZ: false
         PubliclyAccessible: true
         BackupRetentionPeriod: 7
