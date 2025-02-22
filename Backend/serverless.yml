@@ -17,7 +17,8 @@ provider:
         - "arn:aws:s3:::collaboard-avatars/*"
   stage: ${opt:stage, 'dev'}
   environment:
-    DATABASE_URL: postgres://${env:AWS_DB_MASTER_USERNAME}:${env:AWS_DB_MASTER_PASSWORD}@${cf:rds-service-${self:provider.stage}.RDSInstanceEndpoint}:${cf:rds-service-${self:provider.stage}.RDSInstancePort}/${env:AWS_DB_NAME}
+    DATABASE_URL: ${env:DATABASE_URL}
+    DIRECT_URL: ${env:DIRECT_URL}
     ACCESS_TOKEN_SECRET: ${env:ACCESS_TOKEN_SECRET}
     REFRESH_TOKEN_SECRET: ${env:REFRESH_TOKEN_SECRET}
     GMAIL_USER: ${env:GMAIL_USER}
